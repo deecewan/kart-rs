@@ -275,6 +275,38 @@ lazy_static! {
             name: "Sky-High Sundae",
             files: vec![load_reference_hash!("intro/sky_high_sundae.jpg")],
         },
+        IntroReference {
+            name: "London Loop (Tour)",
+            files: vec![load_reference_hash!("intro/london_loop_tour.jpg")],
+        },
+        IntroReference {
+            name: "Boo Lake (GBA)",
+            files: vec![load_reference_hash!("intro/boo_lake_gba.jpg")],
+        },
+        IntroReference {
+            name: "Alpine Pass (3DS)",
+            files: vec![load_reference_hash!("intro/alpine_pass_3ds.jpg")],
+        },
+        IntroReference {
+            name: "Maple Treeway (Wii)",
+            files: vec![load_reference_hash!("intro/maple_treeway_wii.jpg")],
+        },
+        IntroReference {
+            name: "Berlin Byways (Tour)",
+            files: vec![load_reference_hash!("intro/berlin_byways_tour.jpg")],
+        },
+        IntroReference {
+            name: "Peach Gardens (DS)",
+            files: vec![load_reference_hash!("intro/peach_gardens_ds.jpg")],
+        },
+        IntroReference {
+            name: "Merry Mountain",
+            files: vec![load_reference_hash!("intro/merry_mountain.jpg")],
+        },
+        IntroReference {
+            name: "Rainbow Road (3DS)",
+            files: vec![load_reference_hash!("intro/rainbow_road_3ds.jpg")],
+        },
     ];
 }
 
