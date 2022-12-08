@@ -176,7 +176,7 @@ lazy_static! {
             files: vec![load_reference_hash!("intro/ice_ice_outpost.jpg")],
         },
         IntroReference {
-            name: "Hyrule Circult",
+            name: "Hyrule Circuit",
             files: vec![load_reference_hash!("intro/hyrule_circuit.jpg")],
         },
         IntroReference {
