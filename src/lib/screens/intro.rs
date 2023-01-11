@@ -7,15 +7,15 @@ use image::GenericImageView;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 
-struct IntroReference<'a> {
-    name: &'a str,
-    files: Vec<image_hasher::ImageHash>,
+pub struct IntroReference<'a> {
+    pub name: &'a str,
+    pub files: Vec<image_hasher::ImageHash>,
 }
 
 lazy_static! {
     static ref REFERENCE_HASH: image_hasher::ImageHash =
         load_reference_hash!("intro/intro_reference.jpg");
-    static ref INTRO_HASHES: Vec<IntroReference<'static>> = vec![
+    pub static ref INTRO_HASHES: Vec<IntroReference<'static>> = vec![
         IntroReference {
             name: "Sunshine Airport",
             files: vec![load_reference_hash!("intro/sunshine_airport.jpg")],
@@ -365,7 +365,7 @@ fn find_closest_track(image: image::DynamicImage) -> Option<&'static str> {
                 None
             }
         })
-        .min_by(|a, b| a.1.cmp(&b.1))
+        .min_by(|(_, a), (_, b)| a.cmp(&b))
         .map(|(name, _)| name)
 }
 

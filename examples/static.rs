@@ -1,10 +1,17 @@
 use kart_rs::util::*;
 use std::path::Path;
 
-fn main() {
-    let image = "/Users/david/projects/ferocia/kartalytics/analyser/training-data/2017062119574100-16851BE00BC6068871FE49D98876D6C5.jpg";
+use clap::Parser;
 
-    let path = Path::new(image);
+#[derive(Parser, Debug)]
+struct Opts {
+    #[arg(long)]
+    pub path: String,
+}
+
+fn main() {
+    let args = Opts::parse();
+    let path = Path::new(&args.path);
 
     print_image_from_path(&path.to_path_buf());
 

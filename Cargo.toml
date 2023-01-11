@@ -10,11 +10,21 @@ path = "src/lib/lib.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-base64 = "0.13.1"
-clap = { version = "4.0.18", features = ["derive"] }
-dialoguer = "0.10.2"
-image = "0.24.4"
-image_hasher = "1.1.0"
+base64 = "0.21.0"
+clap = { version = "4.0.32", features = ["derive"] }
+console = "0.15.4"
+dialoguer = { features = ["fuzzy-select"], git = "https://github.com/mitsuhiko/dialoguer", rev = "0c8b5e5a93bb6ea467a488032aa47cbefa22a97c" }
+# needs a new version released that has the max-length option
+# dialoguer = { version = "0.10.2", features = ["fuzzy-select"] }
+image = "0.24.5"
+image_hasher = "1.1.2"
 lazy_static = "1.4.0"
-rayon = "1.5.3"
+nix = { version = "0.26.1", default-features = false, features = ["user"] }
+# nokhwa = { version = "0.10.3", features = ["output-threaded", "input-native", "decoding"] }
+rayon = "1.6.1"
+strum_macros = "0.24.3"
+uuid = { version = "1.2.2", features = ["v4", "fast-rng"] }
 uvc = { version = "0.2.0", features = ["vendor"] }
+
+[dev-dependencies]
+pretty_assertions = "1.3.0"

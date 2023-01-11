@@ -1,3 +1,4 @@
+use base64::prelude::*;
 use std::io::{Cursor, Read, Seek};
 use std::path::PathBuf;
 use std::time::Duration;
@@ -7,7 +8,14 @@ pub fn timed_frame(image: &image::DynamicImage) -> Duration {
     let result = super::frame_process::process(image.clone());
     let end = std::time::Instant::now();
 
-    println!("result: {:?}", result);
+    match result {
+        Some(crate::screens::Screen::Race(race)) => {
+            println!("result: Race Screen\n{}", race);
+        }
+        _ => {
+            println!("result: {:?}", result);
+        }
+    }
 
     let delta = end - start;
 
@@ -37,8 +45,8 @@ pub fn print_dynamic_image(name: &str, image: &image::DynamicImage) {
 }
 
 pub fn print_image(name: &str, bytes: &[u8], width: u32, height: u32) {
-    let file_name = base64::encode(name);
-    let file_contents = base64::encode(bytes);
+    let file_name = BASE64_STANDARD.encode(name);
+    let file_contents = BASE64_STANDARD.encode(bytes);
     println!(
         "\x1b]1337;File=name={file_name};inline=1;width={width}px;height={height}px:{file_contents}\x07",
     );

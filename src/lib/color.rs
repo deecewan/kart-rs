@@ -1,10 +1,16 @@
 use image::Rgb;
 
+pub const COLOR_THRESHOLD: u16 = 45_000;
+
 pub fn lightness(pixel: &Rgb<u16>) -> u16 {
     let mx = max(pixel.0);
     let mn = min(pixel.0);
 
-    ((mx as u32 + mn as u32) / 2) as u16
+    let total = mx as f32 + mn as f32;
+    let percent = total / (2.0 * (u16::MAX as f32));
+    let res = percent * (u16::MAX as f32);
+
+    res as u16
 }
 
 fn max([red, green, blue]: [u16; 3]) -> u16 {
@@ -15,7 +21,8 @@ fn min([red, green, blue]: [u16; 3]) -> u16 {
     return red.min(green).min(blue);
 }
 
-pub fn average_colors(im: &image::DynamicImage, size: usize) -> [u16; 3] {
+pub fn average_colors(im: &image::DynamicImage) -> [u16; 3] {
+    let size = (im.width() * im.height()) as usize;
     im.to_rgb16()
         .pixels()
         .map(|p| [p.0[0] as usize, p.0[1] as usize, p.0[2] as usize])

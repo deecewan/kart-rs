@@ -1,9 +1,42 @@
 use clap::Parser;
+use console::{style, Style};
 use dialoguer::{theme::ColorfulTheme, Select};
 
 mod cli;
 
 fn main() {
+    if cfg!(target_os = "macos") {
+        if !nix::unistd::Uid::effective().is_root() {
+            // TODO: maybe others? idk
+            let string = format!(
+                "|{}|
+|{}|
+|{}|
+|{}|
+|{}|
+|{}|",
+                console::pad_str_with("", 80, console::Alignment::Center, None, '-'),
+                console::pad_str("", 80, console::Alignment::Center, None),
+                console::pad_str(
+                    "This program must be run as root in order to",
+                    80,
+                    console::Alignment::Center,
+                    None
+                ),
+                console::pad_str(
+                    "correctly stream the USB Camera",
+                    80,
+                    console::Alignment::Center,
+                    None
+                ),
+                console::pad_str("", 80, console::Alignment::Center, None),
+                console::pad_str_with("", 80, console::Alignment::Center, None, '-'),
+            );
+            println!("{}", style(string).red());
+            std::process::exit(1);
+        }
+    }
+
     let args = cli::Cli::parse();
 
     let ctx = uvc::Context::new().expect("Could not get context");
@@ -60,5 +93,5 @@ fn main() {
         }
     };
 
-    kart_rs::stream::from_device(&device);
+    kart_rs::stream::from_device(&device, args.store_frames);
 }

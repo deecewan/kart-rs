@@ -3,9 +3,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use uvc::Device;
 
-const STORE_FRAMES: bool = false;
-
-pub fn from_device(device: &Device) {
+pub fn from_device(device: &Device, store_frames: bool) {
     let handle = device.open().expect("couldn't open handle to device");
 
     let format = uvc::StreamFormat {
@@ -20,7 +18,6 @@ pub fn from_device(device: &Device) {
         .expect("Could not open a stream with this format");
 
     let counter = Arc::new(AtomicUsize::new(0));
-
     // Get a stream, calling the closure as callback for every frame
     let _stream = stream_handle
         .start_stream(
@@ -37,7 +34,7 @@ pub fn from_device(device: &Device) {
                 let res = match image::load_from_memory_with_format(bytes, image::ImageFormat::Jpeg)
                 {
                     Ok(frame) => {
-                        if STORE_FRAMES {
+                        if store_frames {
                             if let Err(e) = frame.save(format!("frame_{:?}.jpg", count)) {
                                 println!("Failed to save image `frame_{:?}.jpg`: {:?}", count, e);
                             }

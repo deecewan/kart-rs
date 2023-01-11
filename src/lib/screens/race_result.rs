@@ -1,15 +1,24 @@
 use super::Screen;
-use crate::color::{average_colors, lightness, mostly_blue, mostly_green, mostly_red};
+use crate::color::{
+    average_colors, lightness, mostly_blue, mostly_green, mostly_red, COLOR_THRESHOLD,
+};
 use crate::reference::Reference;
 use rayon::prelude::*;
 
 const SCOREBOARD_TOP_MARGIN: u32 = 50;
 const SCOREBOARD_PLAYER_HEIGHT: u32 = 48;
 const SCOREBOARD_PLAYER_MARGIN: u32 = 4;
-const COLOR_THRESHOLD: u16 = 45_000;
 
 #[derive(Debug, PartialEq)]
-pub struct RaceResult {}
+pub struct RaceResult {
+    players: Vec<Player>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Player {
+    index: u8,
+    position: u8,
+}
 
 impl Reference for RaceResult {
     fn compare(frame: &image::DynamicImage) -> bool {
@@ -21,8 +30,6 @@ impl Reference for RaceResult {
         let pixel = frame.get_pixel(width / 2 - 1, 50);
 
         let value = lightness(pixel);
-
-        println!("result: {:?}", value);
 
         return value > 12_850;
     }
@@ -36,32 +43,37 @@ impl Reference for RaceResult {
             .count();
 
         if pixels > 10 {
-            println!("with moves");
             return None;
         }
 
-        (0..12).par_bridge().for_each(|i| {
-            let offset = 2 + i * (SCOREBOARD_PLAYER_HEIGHT + SCOREBOARD_PLAYER_MARGIN);
-            let check_slice = frame.crop_imm(
-                (frame.width() / 2) - 1,
-                SCOREBOARD_TOP_MARGIN + offset,
-                2,
-                2,
-            );
+        let players: Vec<_> = (0..12)
+            .par_bridge()
+            .filter_map(|i| {
+                let offset = 2 + i * (SCOREBOARD_PLAYER_HEIGHT + SCOREBOARD_PLAYER_MARGIN);
+                let check_slice = frame.crop_imm(
+                    (frame.width() / 2) - 1,
+                    SCOREBOARD_TOP_MARGIN + offset,
+                    2,
+                    2,
+                );
 
-            let [average_red, average_green, average_blue] = average_colors(&check_slice, 4);
+                let [average_red, average_green, average_blue] = average_colors(&check_slice);
 
-            if average_red > COLOR_THRESHOLD && average_green > COLOR_THRESHOLD {
-                println!("yellow: {}", i + 1);
-            } else if average_green > COLOR_THRESHOLD && average_blue > COLOR_THRESHOLD {
-                println!("blue: {}", i + 1);
-            } else if average_green > COLOR_THRESHOLD {
-                println!("green: {}", i + 1);
-            } else if average_red > COLOR_THRESHOLD {
-                println!("red: {}", i + 1);
-            }
-        });
+                let position: u8 = i as u8 + 1;
+                if average_red > COLOR_THRESHOLD && average_green > COLOR_THRESHOLD {
+                    Some(Player { index: 0, position })
+                } else if average_green > COLOR_THRESHOLD && average_blue > COLOR_THRESHOLD {
+                    Some(Player { index: 1, position })
+                } else if average_green > COLOR_THRESHOLD {
+                    Some(Player { index: 3, position })
+                } else if average_red > COLOR_THRESHOLD {
+                    Some(Player { index: 2, position })
+                } else {
+                    None
+                }
+            })
+            .collect();
 
-        Some(Screen::RaceResult(RaceResult {}))
+        Some(Screen::RaceResult(RaceResult { players }))
     }
 }
