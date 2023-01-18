@@ -1,20 +1,18 @@
 use kart_rs::util::*;
-use std::path::Path;
+use std::path::PathBuf;
 
 use clap::Parser;
 
 #[derive(Parser, Debug)]
 struct Opts {
-    #[arg(long)]
-    pub path: String,
+    pub path: PathBuf,
 }
 
 fn main() {
     let args = Opts::parse();
-    let path = Path::new(&args.path);
 
-    print_image_from_path(&path.to_path_buf());
+    print_image_from_path(&args.path);
 
-    let image = image::open(path).expect("failed to open static image");
+    let image = image::open(&args.path).expect("failed to open static image");
     timed_frame(&image);
 }

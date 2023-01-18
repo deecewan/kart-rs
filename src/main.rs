@@ -1,13 +1,13 @@
 use clap::Parser;
-use console::{style, Style};
+use console::style;
 use dialoguer::{theme::ColorfulTheme, Select};
 
 mod cli;
 
 fn main() {
+    // TODO: maybe others? idk
     if cfg!(target_os = "macos") {
         if !nix::unistd::Uid::effective().is_root() {
-            // TODO: maybe others? idk
             let string = format!(
                 "|{}|
 |{}|
