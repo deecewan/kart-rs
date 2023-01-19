@@ -1,7 +1,9 @@
+use crate::color::average_colors;
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
 use crate::screens::Screen;
+use crate::util::print_dynamic_image;
 use image::GenericImage;
 use image::GenericImageView;
 use lazy_static::lazy_static;
@@ -67,7 +69,7 @@ lazy_static! {
             ],
         },
         VariantGroup {
-            variant: load_reference_hash!("intro/variants/3ds.png"),
+            variant: load_reference_hash!("intro/variants/ds.png"),
             tracks: vec![
                 IntroReference {
                     name: "Cheep Cheep Beach (DS)",
@@ -381,18 +383,45 @@ impl Reference for Intro {
         let check_hash = hasher::hash_image(crop);
         let delta = REFERENCE_HASH.dist(&check_hash);
 
-        return delta <= 10;
+        if delta > 5 {
+            return false;
+        }
+
+        return check_speed_slice(frame);
     }
 
     fn process(frame: &image::DynamicImage) -> Option<Screen> {
         let variant = get_variant_image(&frame);
         let track = get_track_image(&frame);
 
-        let closest_track = find_closest_track(variant, track).unwrap_or("Unknown Course");
-        Some(Screen::Intro(Intro {
-            course: closest_track,
-        }))
+        let closest_track = find_closest_track(variant, track);
+
+        let course = match closest_track {
+            None => {
+                let now = std::time::SystemTime::now();
+                let timestamp = now
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .expect("time went backwards")
+                    .as_millis();
+                let filename = format!("unknown-intros/{}.jpg", timestamp);
+                frame.save(filename).expect("Failed to save unknown course");
+                "Unknown Course"
+            }
+            Some(course) => course,
+        };
+
+        Some(Screen::Intro(Intro { course }))
     }
+}
+
+fn check_speed_slice(frame: &image::DynamicImage) -> bool {
+    // make sure the speed indicator shows on the right side, otherwise
+    // there is no text, so the track will be unknown
+    let speed_slice = frame.crop_imm(1130, 600, 10, 2);
+
+    let [r, g, b] = average_colors(&speed_slice);
+
+    return r > 60_000 && g > 60_000 && b > 60_000;
 }
 
 pub fn get_variant_image(image: &image::DynamicImage) -> image::DynamicImage {
@@ -419,7 +448,11 @@ fn find_closest_track(
         .iter()
         // from some testing, non-matching variants are well over 30, so we're
         // unlikely to have multiple variants under 10 - no need to filter + min
-        .find(|g| g.variant.dist(&variant_hash) < 10)
+        .find(|g| {
+            let dist = g.variant.dist(&variant_hash);
+
+            return dist < 10;
+        })
         .map(|group| {
             let track_hash = hasher::hash_image(track);
 
@@ -451,5 +484,38 @@ fn set_black_pixels(image: &mut image::DynamicImage) {
                 image.put_pixel(x, y, image::Rgba::from([0, 0, 0, 1]));
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Intro;
+    use crate::reference::Reference;
+
+    #[test]
+    fn ignores_before_title() {
+        let path = "spec_data/lib/screens/intro/no_track_name.jpg";
+        let frame = image::open(path).expect("failed to open image");
+        let result = Intro::compare(&frame);
+
+        assert!(!result)
+    }
+
+    #[test]
+    fn ignores_partial_title() {
+        let path = "spec_data/lib/screens/intro/partial_track_name.jpg";
+        let frame = image::open(path).expect("failed to open image");
+        let result = Intro::compare(&frame);
+
+        assert!(!result)
+    }
+
+    #[test]
+    fn approves_full_title() {
+        let path = "spec_data/lib/screens/intro/full_track_name.jpg";
+        let frame = image::open(path).expect("failed to open image");
+        let result = Intro::compare(&frame);
+
+        assert!(result)
     }
 }

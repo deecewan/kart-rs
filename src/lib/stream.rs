@@ -40,7 +40,7 @@ pub fn from_device(device: &Device, store_frames: bool) {
                             }
                         }
 
-                        Some(crate::frame_process::process(frame))
+                        crate::frame_process::process(frame)
                     }
                     Err(e) => {
                         eprintln!("Err! {:?}", e);
@@ -54,7 +54,7 @@ pub fn from_device(device: &Device, store_frames: bool) {
 
                 let fps = Duration::from_secs(1).as_micros() / delta.as_micros();
                 let printable_res = match res {
-                    Some(Some(screen)) => format!("{:?}", screen),
+                    Some(screen) => format!("{:?}", screen),
                     _ => "Unknown".into(),
                 };
                 println!("{} (fps: {:?})", printable_res, fps);

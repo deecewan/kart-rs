@@ -51,6 +51,8 @@ struct ItemReference {
 }
 
 lazy_static! {
+    static ref LAP_FLAG_REFERENCE: image_hasher::ImageHash =
+        load_reference_hash!("race/lap_flag.jpg");
     static ref GO_REFERENCE: image_hasher::ImageHash = load_reference_hash!("race/go.jpg");
     static ref FINISH_REFERENCE: image_hasher::ImageHash =
         load_reference_hash!("race/finished.jpg");
@@ -391,6 +393,7 @@ impl Display for Race {
 }
 
 const POSITION_CROP: [[u32; 2]; 4] = [[57, 239], [1167, 239], [57, 599], [1167, 599]];
+const LAP_FLAG_CROP: [[u32; 2]; 4] = [[114, 317], [1178, 317], [114, 677], [1178, 677]];
 const FINISH_CROP: [[u32; 2]; 4] = [[159, 127], [799, 127], [159, 487], [799, 487]];
 const ITEM_CROP: [[u32; 2]; 4] = [[99, 62], [1140, 62], [99, 422], [1140, 422]];
 
@@ -429,7 +432,8 @@ impl Display for Player {
 impl Reference for Race {
     fn process(frame: &image::DynamicImage) -> Option<Screen> {
         let mut players: Vec<Player> = (0..4)
-            // .par_bridge()
+            .par_bridge()
+            .filter(|p| check_player_exists(&frame, p))
             .map(|p| {
                 let position = get_position(&frame, p);
 
@@ -478,6 +482,15 @@ fn check_starting(frame: &image::DynamicImage) -> bool {
     let hash = hasher::hash_image(image);
 
     GO_REFERENCE.dist(&hash) < 15
+}
+
+fn check_player_exists(frame: &image::DynamicImage, index: &usize) -> bool {
+    let [x, y] = LAP_FLAG_CROP[*index];
+    let image = frame.crop_imm(x, y, 11, 11);
+
+    let hash = hasher::hash_image(image);
+
+    return LAP_FLAG_REFERENCE.dist(&hash) < 15;
 }
 
 fn get_position(frame: &image::DynamicImage, index: usize) -> Option<u8> {
@@ -720,7 +733,6 @@ mod tests {
         player!(0, 11),
         player!(1, 12, GoldenMushroom),
         player!(2, 7),
-        player!(3),
     );
 
     test_race!(
@@ -728,6 +740,5 @@ mod tests {
         player!(0, 12, Bullet),
         player!(1, 10, RedShell),
         player!(2, 6),
-        player!(3),
     );
 }
