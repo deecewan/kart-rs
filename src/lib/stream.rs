@@ -35,8 +35,11 @@ pub fn from_device(device: &Device, store_frames: bool) {
                 {
                     Ok(frame) => {
                         if store_frames {
-                            if let Err(e) = frame.save(format!("frame_{:?}.jpg", count)) {
-                                println!("Failed to save image `frame_{:?}.jpg`: {:?}", count, e);
+                            if let Err(e) = frame.save(format!("frames/frame_{:?}.jpg", count)) {
+                                println!(
+                                    "Failed to save image `frames/frame_{:?}.jpg`: {:?}",
+                                    count, e
+                                );
                             }
                         }
 

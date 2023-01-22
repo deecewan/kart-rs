@@ -1,3 +1,5 @@
+use image::GenericImage;
+use image::GenericImageView;
 use image::Rgb;
 
 pub const COLOR_THRESHOLD: u16 = 45_000;
@@ -42,4 +44,20 @@ pub fn mostly_green([r, g, b]: [u16; 3]) -> bool {
 
 pub fn mostly_blue([r, g, b]: [u16; 3]) -> bool {
     return b > 40_000 && r < 20_000 && g < 20_000;
+}
+
+pub fn set_max_contrast(image: &mut image::DynamicImage) {
+    for y in 0..image.height() {
+        for x in 0..image.width() {
+            let px = image.get_pixel(x, y);
+            let [r, g, b, _] = px.0;
+            let avg = (r as u16 + g as u16 + b as u16) / 3;
+
+            if avg > 220 {
+                image.put_pixel(x, y, image::Rgba::from([255, 255, 255, 1]));
+            } else {
+                image.put_pixel(x, y, image::Rgba::from([0, 0, 0, 1]));
+            }
+        }
+    }
 }

@@ -1,11 +1,8 @@
-use crate::color::average_colors;
+use crate::color::{average_colors, set_max_contrast};
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
 use crate::screens::Screen;
-use crate::util::print_dynamic_image;
-use image::GenericImage;
-use image::GenericImageView;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 
@@ -426,14 +423,14 @@ fn check_speed_slice(frame: &image::DynamicImage) -> bool {
 
 pub fn get_variant_image(image: &image::DynamicImage) -> image::DynamicImage {
     let mut variant = image.crop_imm(258, 638, 80, 18);
-    set_black_pixels(&mut variant);
+    set_max_contrast(&mut variant);
 
     return variant;
 }
 
 pub fn get_track_image(image: &image::DynamicImage) -> image::DynamicImage {
     let mut track = image.crop_imm(338, 620, 350, 36);
-    set_black_pixels(&mut track);
+    set_max_contrast(&mut track);
 
     return track;
 }
@@ -469,22 +466,6 @@ fn find_closest_track(
                 .map(|(name, _)| name)
         })
         .flatten()
-}
-
-fn set_black_pixels(image: &mut image::DynamicImage) {
-    for y in 0..image.height() {
-        for x in 0..image.width() {
-            let px = image.get_pixel(x, y);
-            let [r, g, b, _] = px.0;
-            let avg = (r as u16 + g as u16 + b as u16) / 3;
-
-            if avg > 220 {
-                image.put_pixel(x, y, image::Rgba::from([255, 255, 255, 1]));
-            } else {
-                image.put_pixel(x, y, image::Rgba::from([0, 0, 0, 1]));
-            }
-        }
-    }
 }
 
 #[cfg(test)]
