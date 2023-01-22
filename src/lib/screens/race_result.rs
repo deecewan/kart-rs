@@ -46,7 +46,7 @@ impl Reference for RaceResult {
             return None;
         }
 
-        let players: Vec<_> = (0..12)
+        let mut players: Vec<_> = (0..12)
             .par_bridge()
             .filter_map(|i| {
                 let offset = 2 + i * (SCOREBOARD_PLAYER_HEIGHT + SCOREBOARD_PLAYER_MARGIN);
@@ -73,6 +73,8 @@ impl Reference for RaceResult {
                 }
             })
             .collect();
+
+        players.sort_unstable_by(|a, b| a.index.cmp(&b.index));
 
         Some(Screen::RaceResult(RaceResult { players }))
     }

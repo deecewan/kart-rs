@@ -1,5 +1,6 @@
 use super::Screen;
 use crate::color::average_colors;
+use crate::color::max_color_diff;
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
@@ -93,7 +94,7 @@ impl Reference for MatchResult {
 }
 
 fn calculate_score(section: &mut image::DynamicImage) -> Option<u8> {
-    darken_pixels(section);
+    max_color_diff(section, 130);
 
     let tens = get_number(&section, 0);
     let ones = get_number(&section, 23);
@@ -137,20 +138,4 @@ fn is_black(crop: &image::DynamicImage) -> bool {
     let average = (r as u32 + g as u32 + b as u32) / 3;
 
     return average < 25_000;
-}
-
-fn darken_pixels(image: &mut image::DynamicImage) {
-    for y in 0..image.height() {
-        for x in 0..image.width() {
-            let px = image.get_pixel(x, y);
-            let [r, g, b, _] = px.0;
-            let avg = (r as u16 + g as u16 + b as u16) / 3;
-
-            if avg > 130 {
-                image.put_pixel(x, y, image::Rgba::from([255, 255, 255, 1]));
-            } else {
-                image.put_pixel(x, y, image::Rgba::from([0, 0, 0, 1]));
-            }
-        }
-    }
 }

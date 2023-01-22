@@ -6,6 +6,7 @@ use crate::color::{average_colors, lightness, COLOR_THRESHOLD};
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
+use crate::util::print_dynamic_image;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 
@@ -76,7 +77,10 @@ lazy_static! {
             ],
         },
         ImageReference {
-            files: vec![load_reference_hash!("race/pos5.png"),],
+            files: vec![
+                load_reference_hash!("race/pos5.png"),
+                load_reference_hash!("race/pos5-alt.png"),
+            ],
         },
         ImageReference {
             files: vec![
@@ -450,7 +454,7 @@ impl Reference for Race {
             })
             .collect();
 
-        players.sort_by(|a, b| a.index.cmp(&b.index));
+        players.sort_unstable_by(|a, b| a.index.cmp(&b.index));
 
         let starting = check_starting(&frame);
 
@@ -463,17 +467,10 @@ impl Reference for Race {
         }
 
         let width = frame.width();
-        let max_lightness = frame
-            .crop_imm(width / 2 - 1, 48, 1, 8)
-            .to_rgb16()
-            .pixels()
-            .map(|p| lightness(p))
-            .max();
+        let [r, g, b] = average_colors(&frame.crop_imm(width / 2 - 1, 48, 1, 8));
+        let average = (r as u32 + g as u32 + b as u32) / 3;
 
-        match max_lightness {
-            Some(max_lightness) => max_lightness < 5250,
-            None => false,
-        }
+        return average < 5000;
     }
 }
 
@@ -490,7 +487,7 @@ fn check_player_exists(frame: &image::DynamicImage, index: &usize) -> bool {
 
     let hash = hasher::hash_image(image);
 
-    return LAP_FLAG_REFERENCE.dist(&hash) < 15;
+    return LAP_FLAG_REFERENCE.dist(&hash) < 20;
 }
 
 fn get_position(frame: &image::DynamicImage, index: usize) -> Option<u8> {

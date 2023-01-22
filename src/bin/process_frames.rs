@@ -11,12 +11,55 @@ fn main() {
     let args = Args::parse();
 
     args.files.iter().for_each(|path| {
-        println!("Processing {:?}", path);
-        let image = image::open(&path).expect("failed to open static image");
-        print_dynamic_image(path.to_str().unwrap(), &image);
-
-        let result = kart_rs::frame_process::process(image.clone());
-
-        println!("Result: {:?}", result);
+        if path.is_dir() {
+            process_dir(path);
+        } else {
+            process(path);
+        }
     });
+}
+
+fn process(path: &PathBuf) {
+    println!("Processing {:?}", path);
+    let image = image::open(&path)
+        .expect("failed to open static image")
+        .resize(1280, 720, image::imageops::Nearest);
+    print_dynamic_image(path.to_str().unwrap(), &image);
+
+    let result = kart_rs::frame_process::process(image.clone());
+
+    println!("Result: {:?}", result);
+}
+
+fn process_dir(path: &PathBuf) {
+    let mut paths = std::fs::read_dir(path)
+        .expect("couldn't open dir")
+        .filter(|f| f.is_ok())
+        .map(|f| f.unwrap().path())
+        .filter(|f| f.is_file())
+        .collect::<Vec<PathBuf>>();
+
+    paths.sort_unstable_by(|a, b| {
+        let first = String::from(
+            a.file_stem()
+                .unwrap()
+                .to_str()
+                .expect("couldn't make the file name a string"),
+        );
+        let (_, first) = first.rsplit_once('_').expect("failed to split first");
+        let second = String::from(
+            b.file_stem()
+                .unwrap()
+                .to_str()
+                .expect("couldn't make the file name a string"),
+        );
+        let (_, second) = second.rsplit_once('_').expect("failed to split second");
+
+        let first = first.parse::<usize>().expect("couldn't parse the number");
+        let second = second.parse::<usize>().expect("couldn't parse the number");
+
+        return first.cmp(&second);
+    });
+
+    paths.iter().for_each(|f| process(&f));
 }

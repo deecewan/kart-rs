@@ -1,4 +1,5 @@
 mod color;
+pub mod emit;
 pub mod frame_process;
 mod hasher;
 pub mod reference;

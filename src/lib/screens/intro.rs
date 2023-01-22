@@ -1,4 +1,4 @@
-use crate::color::{average_colors, set_max_contrast};
+use crate::color::{average_colors, max_color_diff};
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
@@ -423,14 +423,14 @@ fn check_speed_slice(frame: &image::DynamicImage) -> bool {
 
 pub fn get_variant_image(image: &image::DynamicImage) -> image::DynamicImage {
     let mut variant = image.crop_imm(258, 638, 80, 18);
-    set_max_contrast(&mut variant);
+    max_color_diff(&mut variant, 220);
 
     return variant;
 }
 
 pub fn get_track_image(image: &image::DynamicImage) -> image::DynamicImage {
     let mut track = image.crop_imm(338, 620, 350, 36);
-    set_max_contrast(&mut track);
+    max_color_diff(&mut track, 220);
 
     return track;
 }
