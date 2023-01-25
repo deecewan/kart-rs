@@ -1,21 +1,21 @@
-use std::fmt::Display;
-use std::vec::Vec;
-
 use super::Screen;
-use crate::color::{average_colors, lightness, COLOR_THRESHOLD};
+use crate::color::{average_colors, COLOR_THRESHOLD};
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
-use crate::util::print_dynamic_image;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
+use serde::{ser::SerializeMap, Serialize, Serializer};
+use std::fmt::Display;
+use std::vec::Vec;
 
 #[derive(Debug)]
 struct ImageReference {
     files: Vec<image_hasher::ImageHash>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Item {
     Banana,
     BananaDouble,
@@ -37,7 +37,10 @@ pub enum Item {
     Mushroom,
     MushroomDouble,
     MushroomTriple,
+
+    #[serde(rename = "pirhana-plant")]
     PiranhaPlant,
+
     RedShell,
     RedShellDouble,
     RedShellTriple,
@@ -375,9 +378,33 @@ lazy_static! {
     ];
 }
 
-#[derive(Debug, PartialEq, Clone)]
+fn player_vec_serializer<S: Serializer>(
+    players: &Vec<Player>,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    let mut map = serializer.serialize_map(Some(players.len()))?;
+
+    for player in players.iter() {
+        let name = match player.index {
+            0 => "player_one",
+            1 => "player_two",
+            2 => "player_three",
+            3 => "player_four",
+            _ => panic!("too many players! only four supported!"),
+        };
+
+        map.serialize_entry(name, player)?;
+    }
+
+    map.end()
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct Race {
+    #[serde(serialize_with = "player_vec_serializer", flatten)]
     pub players: Vec<Player>,
+
+    #[serde(skip_serializing)]
     pub starting: bool,
 }
 
@@ -401,17 +428,31 @@ const LAP_FLAG_CROP: [[u32; 2]; 4] = [[114, 317], [1178, 317], [114, 677], [1178
 const FINISH_CROP: [[u32; 2]; 4] = [[159, 127], [799, 127], [159, 487], [799, 487]];
 const ITEM_CROP: [[u32; 2]; 4] = [[99, 62], [1140, 62], [99, 422], [1140, 422]];
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Status {
     Racing,
+
+    #[serde(rename = "finish")]
     Finished,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+impl Status {
+    pub fn is_racing(value: &Self) -> bool {
+        value == &Status::Racing
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub struct Player {
+    #[serde(skip_serializing)]
     index: u8,
     position: Option<u8>,
+
+    #[serde(skip_serializing_if = "Status::is_racing")]
     status: Status,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     item: Option<Item>,
 }
 
@@ -601,7 +642,7 @@ fn get_status(frame: &image::DynamicImage, index: usize) -> Status {
 
 #[cfg(test)]
 mod tests {
-    use crate::reference::Reference;
+    use crate::{emit::Emit, reference::Reference};
     use pretty_assertions::assert_eq;
 
     use super::{Item, Player, Race, Status};

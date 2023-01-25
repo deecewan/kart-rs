@@ -1,8 +1,8 @@
-use crate::reference::Reference;
-
 use super::Screen;
+use crate::reference::Reference;
+use serde::Serialize;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Clone, Copy)]
 pub struct Loading {}
 
 impl Reference for Loading {

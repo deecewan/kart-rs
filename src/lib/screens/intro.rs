@@ -5,6 +5,7 @@ use crate::reference::Reference;
 use crate::screens::Screen;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
+use serde::Serialize;
 
 pub struct VariantGroup<'a> {
     pub variant: image_hasher::ImageHash,
@@ -368,8 +369,9 @@ lazy_static! {
     ];
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Clone, Copy)]
 pub struct Intro {
+    #[serde(rename = "course_name")]
     course: &'static str,
 }
 

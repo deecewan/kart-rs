@@ -1,3 +1,4 @@
+use super::emit::Emit;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -5,6 +6,8 @@ use uvc::Device;
 
 pub fn from_device(device: &Device, store_frames: bool) {
     let handle = device.open().expect("couldn't open handle to device");
+
+    let emitter = Emit::new();
 
     let format = uvc::StreamFormat {
         width: 1920,
@@ -51,13 +54,18 @@ pub fn from_device(device: &Device, store_frames: bool) {
                     }
                 };
 
+                emitter.emit(&res);
+
                 let end = std::time::Instant::now();
 
                 let delta = end - start;
 
                 let fps = Duration::from_secs(1).as_micros() / delta.as_micros();
                 let printable_res = match res {
-                    Some(screen) => format!("{:?}", screen),
+                    Some(screen) => match screen {
+                        crate::screens::Screen::Race(race) => serde_json::to_string(&race).unwrap(),
+                        _ => format!("{:?}", screen),
+                    },
                     _ => "Unknown".into(),
                 };
                 println!("{} (fps: {:?})", printable_res, fps);

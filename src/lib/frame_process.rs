@@ -3,7 +3,7 @@ use super::screens::*;
 
 pub fn process(frame: image::DynamicImage) -> Option<Screen> {
     let resized = frame.resize(1280, 720, image::imageops::Nearest);
-    if race::Race::compare(&resized) {
+    let res = if race::Race::compare(&resized) {
         race::Race::process(&resized)
     } else if main_menu::MainMenu::compare(&resized) {
         main_menu::MainMenu::process(&resized)
@@ -19,5 +19,7 @@ pub fn process(frame: image::DynamicImage) -> Option<Screen> {
         match_result::MatchResult::process(&resized)
     } else {
         Some(Screen::Unknown)
-    }
+    };
+
+    res
 }

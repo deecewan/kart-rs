@@ -1,5 +1,5 @@
 use clap::Parser;
-use kart_rs::util::*;
+use kart_rs::{emit::Emit, util::*};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
@@ -9,17 +9,18 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
+    let emitter = Emit::new();
 
     args.files.iter().for_each(|path| {
         if path.is_dir() {
-            process_dir(path);
+            process_dir(path, &emitter);
         } else {
-            process(path);
+            process(path, &emitter);
         }
     });
 }
 
-fn process(path: &PathBuf) {
+fn process(path: &PathBuf, emitter: &Emit) {
     println!("Processing {:?}", path);
     let image = image::open(&path)
         .expect("failed to open static image")
@@ -28,10 +29,20 @@ fn process(path: &PathBuf) {
 
     let result = kart_rs::frame_process::process(image.clone());
 
-    println!("Result: {:?}", result);
+    emitter.emit(&result);
+
+    let printable_res = match result {
+        Some(screen) => match screen {
+            kart_rs::screens::Screen::Race(race) => serde_json::to_string_pretty(&race).unwrap(),
+            _ => format!("{:?}", screen),
+        },
+        _ => "Unknown".into(),
+    };
+
+    println!("Result: {}", printable_res);
 }
 
-fn process_dir(path: &PathBuf) {
+fn process_dir(path: &PathBuf, emitter: &Emit) {
     let mut paths = std::fs::read_dir(path)
         .expect("couldn't open dir")
         .filter(|f| f.is_ok())
@@ -61,5 +72,5 @@ fn process_dir(path: &PathBuf) {
         return first.cmp(&second);
     });
 
-    paths.iter().for_each(|f| process(&f));
+    paths.iter().for_each(|f| process(&f, emitter));
 }

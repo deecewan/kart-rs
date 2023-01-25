@@ -4,10 +4,9 @@ use crate::color::max_color_diff;
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
-use image::GenericImage;
-use image::GenericImageView;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
+use serde::{ser::SerializeMap, Serialize, Serializer};
 
 lazy_static! {
     static ref REFERENCE_HASH_150: image_hasher::ImageHash =
@@ -16,16 +15,43 @@ lazy_static! {
         load_reference_hash!("match_result/200.jpg");
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct PlayerResult {
+    #[serde(skip_serializing)]
     index: u8,
+
     position: u8,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     score: Option<u8>,
 }
 
-#[derive(Debug, PartialEq)]
+fn player_result_vec_serializer<S: Serializer>(
+    player_results: &Vec<PlayerResult>,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    let mut map = serializer.serialize_map(Some(player_results.len()))?;
+
+    for player in player_results.iter() {
+        let name = match player.index {
+            0 => "player_one",
+            1 => "player_two",
+            2 => "player_three",
+            3 => "player_four",
+            _ => panic!("too many players! only four supported!"),
+        };
+
+        map.serialize_entry(name, player)?;
+    }
+
+    map.end()
+}
+
+#[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct MatchResult {
+    #[serde(serialize_with = "player_result_vec_serializer", flatten)]
     players: Vec<PlayerResult>,
+    speed: Option<u8>,
 }
 
 const POSITION_HEIGHT: u32 = 38;
@@ -35,12 +61,7 @@ const COLOR_THRESHOLD: usize = 55_000;
 
 impl Reference for MatchResult {
     fn compare(frame: &image::DynamicImage) -> bool {
-        let crop = frame.crop_imm(37, 28, 99, 26);
-
-        let check_hash = hasher::hash_image(crop);
-
-        return REFERENCE_HASH_200.dist(&check_hash) < 10
-            || REFERENCE_HASH_150.dist(&check_hash) < 10;
+        race_speed(frame).is_some()
     }
 
     fn process(frame: &image::DynamicImage) -> Option<Screen> {
@@ -88,8 +109,25 @@ impl Reference for MatchResult {
             })
             .collect::<Vec<PlayerResult>>();
         players.sort_unstable_by(|a, b| a.index.cmp(&b.index));
-        let result = MatchResult { players };
+        let result = MatchResult {
+            players,
+            speed: race_speed(frame),
+        };
         return Some(Screen::MatchResult(result));
+    }
+}
+
+fn race_speed(frame: &image::DynamicImage) -> Option<u8> {
+    let crop = frame.crop_imm(37, 28, 99, 26);
+
+    let check_hash = hasher::hash_image(crop);
+
+    if REFERENCE_HASH_200.dist(&check_hash) < 10 {
+        Some(200)
+    } else if REFERENCE_HASH_150.dist(&check_hash) < 10 {
+        Some(150)
+    } else {
+        None
     }
 }
 

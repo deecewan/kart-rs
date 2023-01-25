@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 pub mod intro;
 pub mod loading;
 pub mod main_menu;
@@ -6,7 +8,8 @@ pub mod race;
 pub mod race_result;
 pub mod select_character;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Clone)]
+#[serde(untagged)]
 pub enum Screen {
     Intro(intro::Intro),
     Loading(loading::Loading),

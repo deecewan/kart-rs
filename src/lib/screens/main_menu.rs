@@ -3,12 +3,13 @@ use super::super::reference::Reference;
 use super::Screen;
 use crate::load_reference_hash;
 use lazy_static::lazy_static;
+use serde::Serialize;
 
 lazy_static! {
     static ref REFERENCE_HASH: image_hasher::ImageHash = load_reference_hash!("main_menu.jpg");
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Clone, Copy)]
 pub struct MainMenu {}
 
 impl Reference for MainMenu {
