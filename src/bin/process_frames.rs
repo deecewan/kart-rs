@@ -1,6 +1,7 @@
 use clap::Parser;
-use kart_rs::emit::{Emit, EmitMode};
+use emitter;
 use std::path::PathBuf;
+use analyzer;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -9,7 +10,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let emitter = Emit::new(EmitMode::Debug);
+    let emitter = emitter::Emit::<analyzer::Screen>::new(emitter::Mode::Real);
 
     args.files.iter().for_each(|path| {
         if path.is_dir() {
@@ -18,31 +19,32 @@ fn main() {
             process(path, &emitter);
         }
     });
+
+    loop {}
 }
 
-fn process(path: &PathBuf, emitter: &Emit) {
+fn process(path: &PathBuf, emitter: &emitter::Emit<analyzer::Screen>) {
     println!("Processing {:?}", path);
     let image = image::open(&path)
         .expect("failed to open static image")
         .resize(1280, 720, image::imageops::Nearest);
-    // print_dynamic_image(path.to_str().unwrap(), &image);
 
-    let result = kart_rs::frame_process::process(image.clone());
+    let result = analyzer::analyze(&image);
 
-    emitter.emit(&result);
+    if let Some(ref result) = result {
+        emitter.emit(result.event_type(), &result);
+    }
+
 
     let printable_res = match result {
-        Some(screen) => match screen {
-            kart_rs::screens::Screen::Race(race) => serde_json::to_string_pretty(&race).unwrap(),
-            _ => format!("{:?}", screen),
-        },
+        Some(screen) => format!("{:?}", screen),
         _ => "Unknown".into(),
     };
 
     println!("Result: {}", printable_res);
 }
 
-fn process_dir(path: &PathBuf, emitter: &Emit) {
+fn process_dir(path: &PathBuf, emitter: &emitter::Emit<analyzer::Screen>) {
     let mut paths = std::fs::read_dir(path)
         .expect("couldn't open dir")
         .filter(|f| f.is_ok())

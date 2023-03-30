@@ -8,6 +8,8 @@ use image;
 use reference::Reference;
 use screens::*;
 
+pub use screens::Screen;
+
 pub fn analyze(frame: &image::DynamicImage) -> Option<Screen> {
     let resized = frame.resize(1280, 720, image::imageops::Nearest);
     let res = if race::Race::compare(&resized) {

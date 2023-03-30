@@ -1,5 +1,5 @@
 use clap::Parser;
-use stream::from_device;
+use stream;
 use analyzer::analyze;
 
 mod cli;
@@ -10,7 +10,7 @@ fn main() {
     let emitter = emitter::Emit::new(emitter::Mode::Real);
     let frame_saver = FrameSaver::new(args.store_frames);
 
-    from_device(move |frame, count| {
+    stream::device::from_device(move |frame, count| {
         frame_saver.save(frame, count);
         let start = std::time::Instant::now();
 

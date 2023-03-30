@@ -1370,6 +1370,7 @@ dependencies = [
  "clap 4.1.14",
  "emitter",
  "image",
+ "serde",
  "serde_json",
  "stream",
 ]

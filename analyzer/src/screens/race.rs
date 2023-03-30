@@ -496,6 +496,10 @@ impl Reference for Race {
             })
             .collect();
 
+        if players.is_empty() {
+            return None;
+        }
+
         players.sort_unstable_by(|a, b| a.index.cmp(&b.index));
 
         let starting = check_starting(&frame);
