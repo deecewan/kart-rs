@@ -74,6 +74,10 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/cheep_cheep_beach_ds.jpg"),
                 },
                 IntroReference {
+                    name: "Mario Circuit (DS)",
+                    reference: load_reference_hash!("intro/tracks/mario_circuit_ds.jpg"),
+                },
+                IntroReference {
                     name: "Peach Gardens (DS)",
                     reference: load_reference_hash!("intro/tracks/peach_gardens_ds.jpg"),
                 },
@@ -115,6 +119,10 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/ribbon_road_gba.jpg"),
                 },
                 IntroReference {
+                    name: "Riverside Park (GBA)",
+                    reference: load_reference_hash!("intro/tracks/riverside_park_gba.jpg"),
+                },
+                IntroReference {
                     name: "Sky Garden (GBA)",
                     reference: load_reference_hash!("intro/tracks/sky_garden_gba.jpg"),
                 },
@@ -138,6 +146,10 @@ lazy_static! {
                 IntroReference {
                     name: "Sherbet Land (GameCube)",
                     reference: load_reference_hash!("intro/tracks/sherbet_land_gcn.jpg"),
+                },
+                IntroReference {
+                    name: "Waluigi Stadium (GameCube)",
+                    reference: load_reference_hash!("intro/tracks/waluigi_stadium_gcn.jpg"),
                 },
                 IntroReference {
                     name: "Yoshi Circuit (GameCube)",
@@ -289,6 +301,10 @@ lazy_static! {
                     name: "Wild Woods",
                     reference: load_reference_hash!("intro/tracks/wild_woods.jpg"),
                 },
+                IntroReference {
+                    name: "Yoshi's Island",
+                    reference: load_reference_hash!("intro/tracks/yoshis_island.jpg"),
+                },
             ],
         },
         VariantGroup {
@@ -312,6 +328,14 @@ lazy_static! {
             variant: load_reference_hash!("intro/variants/tour.png"),
             tracks: vec![
                 IntroReference {
+                    name: "Amsterdam Drift (Tour)",
+                    reference: load_reference_hash!("intro/tracks/amsterdam_drift_tour.jpg"),
+                },
+                IntroReference {
+                    name: "Bangkok Rush (Tour)",
+                    reference: load_reference_hash!("intro/tracks/bangkok_rush_tour.jpg"),
+                },
+                IntroReference {
                     name: "Berlin Byways (Tour)",
                     reference: load_reference_hash!("intro/tracks/berlin_byways_tour.jpg"),
                 },
@@ -326,6 +350,10 @@ lazy_static! {
                 IntroReference {
                     name: "Paris Promenade (Tour)",
                     reference: load_reference_hash!("intro/tracks/paris_promenade_tour.jpg"),
+                },
+                IntroReference {
+                    name: "Singapore Speedway (Tour)",
+                    reference: load_reference_hash!("intro/tracks/singapore_speedway_tour.jpg"),
                 },
                 IntroReference {
                     name: "Sydney Sprint (Tour)",
@@ -343,6 +371,10 @@ lazy_static! {
                 IntroReference {
                     name: "Coconut Mall (Wii)",
                     reference: load_reference_hash!("intro/tracks/coconut_mall_wii.jpg"),
+                },
+                IntroReference {
+                    name: "DK's Snowboard Cross (Wii)",
+                    reference: load_reference_hash!("intro/tracks/dks_snowboard_cross_wii.jpg"),
                 },
                 IntroReference {
                     name: "Grumble Volcano (Wii)",
@@ -475,10 +507,21 @@ mod tests {
     use super::Intro;
     use crate::reference::Reference;
 
+    macro_rules! test_frame {
+        ($file:literal) => {{
+            let image_data = include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/spec-data/screens/intro/",
+                $file,
+                ".jpg"
+            ));
+            image::load_from_memory(image_data).expect("failed to open image")
+        }};
+    }
+
     #[test]
     fn ignores_before_title() {
-        let path = "spec_data/lib/screens/intro/no_track_name.jpg";
-        let frame = image::open(path).expect("failed to open image");
+        let frame = test_frame!("no_track_name");
         let result = Intro::compare(&frame);
 
         assert!(!result)
@@ -486,8 +529,7 @@ mod tests {
 
     #[test]
     fn ignores_partial_title() {
-        let path = "spec_data/lib/screens/intro/partial_track_name.jpg";
-        let frame = image::open(path).expect("failed to open image");
+        let frame = test_frame!("partial_track_name");
         let result = Intro::compare(&frame);
 
         assert!(!result)
@@ -495,8 +537,7 @@ mod tests {
 
     #[test]
     fn approves_full_title() {
-        let path = "spec_data/lib/screens/intro/full_track_name.jpg";
-        let frame = image::open(path).expect("failed to open image");
+        let frame = test_frame!("full_track_name");
         let result = Intro::compare(&frame);
 
         assert!(result)

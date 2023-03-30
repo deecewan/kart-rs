@@ -61,3 +61,11 @@ pub fn max_color_diff(image: &mut image::DynamicImage, cutoff: u16) {
         }
     }
 }
+
+pub fn get_overall_average(image: &image::DynamicImage) -> u32 {
+    let [r, g, b] = average_colors(&image);
+
+    let total = r as u32 + g as u32 + b as u32;
+
+    return total / 3;
+}

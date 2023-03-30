@@ -1,97 +1,62 @@
 use clap::Parser;
-use console::style;
-use dialoguer::{theme::ColorfulTheme, Select};
+use stream::from_device;
+use analyzer::analyze;
 
 mod cli;
 
 fn main() {
-    // TODO: maybe others? idk
-    if cfg!(target_os = "macos") {
-        if !nix::unistd::Uid::effective().is_root() {
-            let string = format!(
-                "|{}|
-|{}|
-|{}|
-|{}|
-|{}|
-|{}|",
-                console::pad_str_with("", 80, console::Alignment::Center, None, '-'),
-                console::pad_str("", 80, console::Alignment::Center, None),
-                console::pad_str(
-                    "This program must be run as root in order to",
-                    80,
-                    console::Alignment::Center,
-                    None
-                ),
-                console::pad_str(
-                    "correctly stream the USB Camera",
-                    80,
-                    console::Alignment::Center,
-                    None
-                ),
-                console::pad_str("", 80, console::Alignment::Center, None),
-                console::pad_str_with("", 80, console::Alignment::Center, None, '-'),
-            );
-            println!("{}", style(string).red());
-            std::process::exit(1);
-        }
-    }
-
     let args = cli::Cli::parse();
 
-    let ctx = uvc::Context::new().expect("Could not get context");
-    let device = match (args.vendor_id, args.product_id) {
-        (Some(vendor_id), Some(product_id)) => {
-            let vendor_id: i32 = vendor_id.parse().expect("failed to parse vendor_id");
-            let product_id: i32 = product_id.parse().expect("failed to parse product_id");
-            ctx.find_device(Some(vendor_id), Some(product_id), None)
-                .expect("Could not find device")
+    let emitter = emitter::Emit::new(emitter::Mode::Real);
+    let frame_saver = FrameSaver::new(args.store_frames);
+
+    from_device(move |frame, count| {
+        frame_saver.save(frame, count);
+        let start = std::time::Instant::now();
+
+        let res = analyze(frame);
+
+        if let Some(res) = &res {
+            emitter.emit(res.event_type(), res);
         }
-        _ => {
-            let devices: Vec<uvc::Device> = ctx.devices().expect("Couldn't load devices").collect();
-            let options: Vec<String> = devices
-                .iter()
-                .map(|d| {
-                    let description = d.description().unwrap();
 
-                    format!(
-                        "{} {}: {:#06x} {:#06x}",
-                        description.manufacturer.unwrap_or("?".to_string()),
-                        description.product.unwrap_or("?".to_string()),
-                        description.vendor_id,
-                        description.product_id,
-                    )
-                })
-                .collect();
+        let end = std::time::Instant::now();
+        let delta = end - start;
+        let fps = std::time::Duration::from_secs(1).as_micros() / delta.as_micros();
 
-            let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Select a device:")
-                .items(&options)
-                .default(0)
-                .interact();
+        let output = match res {
+            None => "Unknown".into(),
+            Some(screen) => {
+                let json = serde_json::to_string(&screen);
+                format!("{:?}", json)
+            },
+        };
 
-            match selection {
-                Ok(s) => match devices.get(s) {
-                    Some(d) => {
-                        let desc = d.description().expect("couldn't get device description");
+        println!("{output} ({fps} fps)");
+    });
+}
 
-                        ctx.find_device(
-                            Some(desc.vendor_id as i32),
-                            Some(desc.product_id as i32),
-                            None,
-                        )
-                        .expect("Could not find device")
-                    }
-                    None => {
-                        panic!("Selected device not in device array.");
-                    }
-                },
-                Err(e) => {
-                    panic!("Error with device selection: {:?}", e);
-                }
-            }
+struct FrameSaver { name: Option<String> }
+
+impl FrameSaver {
+    fn new(save: bool) -> Self {
+        let name = if save {
+            let name = format!("{}", chrono::Utc::now().to_rfc3339());
+            std::fs::create_dir_all(format!("frames/{}", name))
+                .expect("unable to create frame saving directory");
+
+            Some(name)
+        } else { None };
+
+        FrameSaver { name }
+    }
+
+    fn save(&self, frame: &image::DynamicImage, count: usize) {
+        let Some(name) = &self.name else { return; };
+
+        let output_path = format!("frames/{}/frame_{:?}.jpg", name, count);
+        if let Err(e) = frame.save(&output_path) {
+            eprintln!("Failed to save frame: {:?}", e);
         }
-    };
-
-    kart_rs::stream::from_device(&device, args.store_frames);
+    }
 }

@@ -3,6 +3,7 @@ use crate::color::{average_colors, COLOR_THRESHOLD};
 use crate::hasher;
 use crate::load_reference_hash;
 use crate::reference::Reference;
+use crate::util::is_splitscreen;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 use serde::{ser::SerializeMap, Serialize, Serializer};
@@ -503,7 +504,7 @@ impl Reference for Race {
     }
 
     fn compare(frame: &image::DynamicImage) -> bool {
-        if !Self::is_splitscreen(frame) {
+        if !is_splitscreen(frame) {
             return false;
         }
 
@@ -642,7 +643,7 @@ fn get_status(frame: &image::DynamicImage, index: usize) -> Status {
 
 #[cfg(test)]
 mod tests {
-    use crate::{emit::Emit, reference::Reference};
+    use crate::reference::Reference;
     use pretty_assertions::assert_eq;
 
     use super::{Item, Player, Race, Status};
@@ -686,8 +687,8 @@ mod tests {
         ($name:ident, $($players:expr,)*) => {
             #[test]
             fn $name() {
-                let path = "spec_data/lib/screens/race/".to_string() + stringify!($name) + ".jpg";
-                let frame = image::open(path).expect("failed to open image");
+                let image_data = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/spec-data/screens/race/", stringify!($name), ".jpg"));
+                let frame = image::load_from_memory(image_data).expect("failed to open image");
                 let result = Race::process(&frame);
 
                 assert_eq!(

@@ -3,6 +3,7 @@ use crate::color::{
     average_colors, lightness, mostly_blue, mostly_green, mostly_red, COLOR_THRESHOLD,
 };
 use crate::reference::Reference;
+use crate::util::is_splitscreen;
 use rayon::prelude::*;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
@@ -49,7 +50,7 @@ pub struct Player {
 
 impl Reference for RaceResult {
     fn compare(frame: &image::DynamicImage) -> bool {
-        if !Self::is_splitscreen(frame) {
+        if !is_splitscreen(frame) {
             return false;
         }
         let width = frame.width();

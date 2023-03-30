@@ -1,5 +1,5 @@
 use clap::Parser;
-use kart_rs::{emit::Emit, util::*};
+use kart_rs::emit::{Emit, EmitMode};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
@@ -9,7 +9,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let emitter = Emit::new();
+    let emitter = Emit::new(EmitMode::Debug);
 
     args.files.iter().for_each(|path| {
         if path.is_dir() {
@@ -25,7 +25,7 @@ fn process(path: &PathBuf, emitter: &Emit) {
     let image = image::open(&path)
         .expect("failed to open static image")
         .resize(1280, 720, image::imageops::Nearest);
-    print_dynamic_image(path.to_str().unwrap(), &image);
+    // print_dynamic_image(path.to_str().unwrap(), &image);
 
     let result = kart_rs::frame_process::process(image.clone());
 

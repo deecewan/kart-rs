@@ -1,0 +1,15 @@
+[package]
+name = "stream"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+console = { workspace = true }
+dialoguer = { workspace = true }
+image = { workspace = true }
+nix = { version = "0.26.2", default-features = false, features = ["user"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+uvc = { version = "0.2.0", features = ["vendor"] }

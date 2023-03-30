@@ -1,4 +1,7 @@
+use crate::emit::EmitMode;
+
 use super::emit::Emit;
+use chrono::Utc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -7,7 +10,7 @@ use uvc::Device;
 pub fn from_device(device: &Device, store_frames: bool) {
     let handle = device.open().expect("couldn't open handle to device");
 
-    let emitter = Emit::new();
+    let emitter = Emit::new(EmitMode::Real);
 
     let format = uvc::StreamFormat {
         width: 1920,
@@ -19,6 +22,16 @@ pub fn from_device(device: &Device, store_frames: bool) {
     let mut stream_handle = handle
         .get_stream_handle_with_format(format)
         .expect("Could not open a stream with this format");
+
+    let frame_folder_name = if store_frames {
+        let name = format!("{}", Utc::now().to_rfc3339());
+
+        std::fs::create_dir(format!("frames/{}", name))
+            .expect("unable to create frame saving directory");
+        Some(name)
+    } else {
+        None
+    };
 
     let counter = Arc::new(AtomicUsize::new(0));
     // Get a stream, calling the closure as callback for every frame
@@ -37,12 +50,10 @@ pub fn from_device(device: &Device, store_frames: bool) {
                 let res = match image::load_from_memory_with_format(bytes, image::ImageFormat::Jpeg)
                 {
                     Ok(frame) => {
-                        if store_frames {
-                            if let Err(e) = frame.save(format!("frames/frame_{:?}.jpg", count)) {
-                                println!(
-                                    "Failed to save image `frames/frame_{:?}.jpg`: {:?}",
-                                    count, e
-                                );
+                        if let Some(name) = &frame_folder_name {
+                            let output_path = format!("frames/{}/frame_{:?}.jpg", name, count);
+                            if let Err(e) = frame.save(&output_path) {
+                                eprintln!("Failed to save image `{}`: {:?}", output_path, e);
                             }
                         }
 
