@@ -17,7 +17,7 @@ impl Reference for SelectCharacter {
         Some(super::Screen::SelectCharacter(SelectCharacter {}))
     }
     fn compare(frame: &image::DynamicImage) -> bool {
-        let crop = frame.crop_imm(793, 448, 44, 44);
+        let crop = frame.crop_imm(735, 435, 40, 35);
 
         let check_hash = hasher::hash_image(crop);
         let delta = REFERENCE_HASH.dist(&check_hash);
