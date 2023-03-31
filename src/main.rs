@@ -1,6 +1,6 @@
 use clap::Parser;
 use stream;
-use analyzer::analyze;
+use analyzer::{analyze, Screen};
 
 mod cli;
 
@@ -17,7 +17,10 @@ fn main() {
         let res = analyze(frame);
 
         if let Some(res) = &res {
-            emitter.emit(res.event_type(), res);
+            // we want to not emit "unknown screen" events
+            if res != &Screen::Unknown {
+                emitter.emit(res.event_type(), res);
+            }
         }
 
         let end = std::time::Instant::now();
