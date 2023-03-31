@@ -1,7 +1,7 @@
+use analyzer;
 use clap::Parser;
 use emitter;
 use std::path::PathBuf;
-use analyzer;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -34,7 +34,6 @@ fn process(path: &PathBuf, emitter: &emitter::Emit<analyzer::Screen>) {
     if let Some(ref result) = result {
         emitter.emit(result.event_type(), &result);
     }
-
 
     let printable_res = match result {
         Some(screen) => format!("{:?}", screen),

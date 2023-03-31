@@ -1,14 +1,15 @@
+use analyzer::{analyze, Screen};
 use clap::Parser;
 use stream;
-use analyzer::{analyze, Screen};
 
 mod cli;
 
 fn main() {
     let args = cli::Cli::parse();
 
-    let emitter = emitter::Emit::new(emitter::Mode::Real);
     let frame_saver = FrameSaver::new(args.store_frames);
+
+    let emitter = emitter::Emit::new(emitter::Mode::Real);
 
     stream::device::from_device(move |frame, count| {
         frame_saver.save(frame, count);
@@ -32,14 +33,16 @@ fn main() {
             Some(screen) => {
                 let json = serde_json::to_string(&screen);
                 format!("{:?}", json)
-            },
+            }
         };
 
         println!("{output} ({fps} fps)");
     });
 }
 
-struct FrameSaver { name: Option<String> }
+struct FrameSaver {
+    name: Option<String>,
+}
 
 impl FrameSaver {
     fn new(save: bool) -> Self {
@@ -49,7 +52,9 @@ impl FrameSaver {
                 .expect("unable to create frame saving directory");
 
             Some(name)
-        } else { None };
+        } else {
+            None
+        };
 
         FrameSaver { name }
     }

@@ -130,3 +130,67 @@ where
         *inner = new_inner;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use httpmock::prelude::*;
+    use std::time::Duration;
+
+    use super::*;
+    // i hate these tests but something isn't right
+    #[test]
+    fn it_queues_requests() {
+        let server = MockServer::start();
+        let mock_1 = server.mock(|when, then| {
+            when.method("POST")
+                .path("/")
+                .body_contains("\"data\": \"First\"")
+                .body_contains("\"event_type\": \"event type\"");
+            then.status(201);
+        });
+        let mock_2 = server.mock(|when, then| {
+            when.method("POST")
+                .path("/")
+                .body_contains("\"data\": \"Second\"")
+                .body_contains("\"event_type\": \"event type\"");
+            then.status(201);
+        });
+
+        std::env::set_var("KARTALYTICS_URL", server.url("/"));
+
+        let emitter = Emit::<String>::new(Mode::Real);
+
+        for _ in 0..100 {
+            let data: String = "First".into();
+            emitter.emit("event type", &data);
+            // let data: String = "Second".into();
+            // emitter.emit("event type", &data);
+        }
+        for _ in 0..100 {
+            let data: String = "Second".into();
+            emitter.emit("event type", &data);
+            // let data: String = "Second".into();
+            // emitter.emit("event type", &data);
+        }
+        for _ in 0..100 {
+            let data: String = "First".into();
+            emitter.emit("event type", &data);
+            // let data: String = "Second".into();
+            // emitter.emit("event type", &data);
+        }
+        for _ in 0..100 {
+            let data: String = "Second".into();
+            emitter.emit("event type", &data);
+            // let data: String = "Second".into();
+            // emitter.emit("event type", &data);
+        }
+
+        // this is much longer than _required_, because everything should be
+        // done in ~20ms, but this feels like it'll reduce flakes
+        std::thread::sleep(Duration::from_millis(10));
+
+        println!("hits: {}", mock_1.hits());
+        mock_1.assert_hits(2);
+        mock_2.assert_hits(2);
+    }
+}

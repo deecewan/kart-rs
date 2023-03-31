@@ -1,8 +1,8 @@
-use image::DynamicImage;
-use uvc;
 use dialoguer::{theme::ColorfulTheme, Select};
+use image::DynamicImage;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use uvc;
 
 pub fn from_device<F>(on_frame: F)
 where
@@ -37,8 +37,7 @@ where
                     return;
                 }
 
-                match image::load_from_memory_with_format(bytes, image::ImageFormat::Jpeg)
-                {
+                match image::load_from_memory_with_format(bytes, image::ImageFormat::Jpeg) {
                     Ok(frame) => {
                         on_frame(&frame, count.load(Ordering::SeqCst));
                     }

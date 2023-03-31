@@ -1,10 +1,6 @@
 use reqwest::blocking::Response;
 use serde::Serialize;
-use std::{
-    collections::VecDeque,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::sync::mpsc;
 
 #[derive(Clone)]
 pub struct Poster<T: Serialize>
@@ -13,7 +9,7 @@ where
 {
     url: String,
     client: reqwest::blocking::Client,
-    items: Arc<Mutex<VecDeque<T>>>,
+    sender: mpsc::SyncSender<T>,
 }
 
 impl<T> Poster<T>
@@ -35,37 +31,33 @@ where
         let url = std::env::var("KARTALYTICS_URL")
             .expect("KARTALYTICS_URL not set in the environment - it is required.");
 
-        let items = Arc::new(Mutex::new(vec![].into()));
+        let (sender, receiver) = mpsc::sync_channel::<T>(100);
 
-        let mut p = Poster { url, client, items };
-        p.spawn_process_thread();
+        let mut p = Poster {
+            url,
+            client,
+            sender,
+        };
+
+        p.spawn_process_thread(receiver);
 
         return p;
     }
 
     pub fn queue(&self, data: T) {
-        if let Ok(mut items) = self.items.lock() {
-            println!("adding to the queue");
-            items.push_back(data);
+        match self.sender.send(data) {
+            Ok(_) => { /* do nothing */ }
+            Err(e) => {
+                eprintln!("Failed to queue: {e:?}");
+            }
         }
     }
 
-    fn spawn_process_thread(&mut self) {
+    fn spawn_process_thread(&mut self, rx: mpsc::Receiver<T>) {
         let mut clone = self.clone();
 
         std::thread::spawn(move || {
-            let process_lock = Mutex::new(0);
-
-            loop {
-                // we only want to process one item at a time, so we lock on
-                // processing
-                let _lock = process_lock.lock().unwrap();
-                // _but_ we want to be able to keep adding to the queue, so
-                // we don't want to hold this lock for a long time
-                let Some(item) = clone.items.lock()
-                        .map_or(None, |mut items| items.pop_front())
-                        else { continue; };
-
+            for item in rx.iter() {
                 match clone.process(item) {
                     Ok(res) => {
                         println!("Send Successful");
@@ -76,8 +68,6 @@ where
                         eprintln!("Error: {e:?}");
                     }
                 }
-
-                std::thread::sleep(Duration::from_millis(10));
             }
         });
     }
@@ -115,8 +105,8 @@ mod tests {
         p.queue("World".into());
 
         // this is much longer than _required_, because everything should be
-        // done in ~20ms, but this feels like it'll reduce flakes
-        std::thread::sleep(Duration::from_millis(100));
+        // done in ~1ms, but this feels like it'll reduce flakes
+        std::thread::sleep(Duration::from_millis(10));
 
         mock_1.assert();
         mock_2.assert();
