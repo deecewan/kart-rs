@@ -70,6 +70,12 @@ fn get_device<'a>(ctx: &'a uvc::Context) -> uvc::Device<'a> {
         })
         .collect();
 
+    if options.is_empty() {
+        let string = console::style("Couldn't find any capture devices.").red();
+        eprintln!("{string}");
+        std::process::exit(1);
+    }
+
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select a device:")
         .items(&options)

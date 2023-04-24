@@ -716,9 +716,11 @@ dependencies = [
  "chrono",
  "httpmock",
  "rand",
+ "rayon",
  "reqwest",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
