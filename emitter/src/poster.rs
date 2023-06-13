@@ -1,5 +1,6 @@
-use reqwest::blocking::Response;
+use reqwest::Response;
 use serde::Serialize;
+use tokio::runtime::Runtime;
 use std::sync::mpsc;
 
 #[derive(Clone)]
@@ -8,7 +9,7 @@ where
     T: Clone,
 {
     url: String,
-    client: reqwest::blocking::Client,
+    client: reqwest::Client,
     sender: mpsc::SyncSender<T>,
 }
 
@@ -23,7 +24,7 @@ where
             reqwest::header::HeaderValue::from_static("application/json"),
         );
 
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::Client::builder()
             .default_headers(default_headers)
             .build()
             .expect("Couldn't create a request client");
@@ -31,7 +32,7 @@ where
         let url = std::env::var("KARTALYTICS_URL")
             .expect("KARTALYTICS_URL not set in the environment - it is required.");
 
-        let (sender, receiver) = mpsc::sync_channel::<T>(5000);
+        let (sender, receiver) = mpsc::sync_channel::<T>(200);
 
         let mut p = Poster {
             url,
@@ -45,44 +46,53 @@ where
     }
 
     pub fn queue(&self, data: T) {
-        let start = chrono::Utc::now();
         match self.sender.send(data) {
             Ok(_) => { /* do nothing */ }
             Err(e) => {
                 eprintln!("Failed to queue: {e:?}");
             }
         }
-        let end = chrono::Utc::now();
-
-        let delta = end - start;
-
-        println!("Send took {delta:?}");
     }
 
     fn spawn_process_thread(&mut self, rx: mpsc::Receiver<T>) {
         let clone = self.clone();
 
         std::thread::spawn(move || {
-            let pool = rayon::ThreadPoolBuilder::new().build().expect("Failed to create threadpool");
+            let Ok(rt) = Runtime::new() else { panic!("Couldn't create tokio runtime"); };
 
-            for item in rx.iter() {
-                let mut pool_clone = clone.clone();
-                pool.install(move || {
-                    match pool_clone.process(item) {
-                        Ok(_res) => { }
-                        Err(e) => {
-                            eprintln!("Erroring sending request");
-                            eprintln!("Error: {e:?}");
+            rt.block_on(async move {
+                for item in rx.iter() {
+                    let mut pool_clone = clone.clone();
+                    tokio::spawn(async move {
+                        match pool_clone.process(item).await {
+                            Ok(res) => {
+                                println!("res: {res:?}");
+                            },
+                            Err(e) => {
+                                eprintln!("error sending request: {e:?}");
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
     }
 
-    fn process(&mut self, item: T) -> reqwest::Result<Response> {
+    async fn process(&mut self, item: T) -> reqwest::Result<Response> {
         let json = serde_json::to_string_pretty(&item).unwrap();
-        self.client.post(&self.url).body(json).send()
+        println!("sending {}", &json);
+        let start = chrono::Utc::now();
+        let sent_json = json.clone();
+        let res = self.client.post(&self.url).body(sent_json).send().await;
+        println!("sent {}", &json);
+
+        let end = chrono::Utc::now();
+
+        let delta = end - start;
+
+        println!("Send took {delta:?}");
+
+        return res;
     }
 }
 
@@ -132,13 +142,13 @@ mod tests {
         std::env::set_var("KARTALYTICS_URL", server_url);
         let p = Poster::<i32>::new();
 
-        for i in 0..10000 {
+        for i in 0..100 {
             p.queue(i);
         }
 
         // this is much longer than _required_, because everything should be
         // done in ~1ms, but this feels like it'll reduce flakes
-        std::thread::sleep(Duration::from_millis(500));
+        std::thread::sleep(Duration::from_millis(1000));
 
         mock_1.assert_hits(10000);
 

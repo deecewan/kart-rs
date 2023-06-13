@@ -32,7 +32,7 @@ fn main() {
             None => "Unknown".into(),
             Some(screen) => {
                 let json = serde_json::to_string(&screen);
-                format!("{:?}", json)
+                format!("{}: {:?}", screen.event_type(), json)
             }
         };
 
