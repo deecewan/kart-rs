@@ -1,6 +1,6 @@
 use reqwest::blocking::Response;
 use serde::Serialize;
-use std::{sync::mpsc, thread::JoinHandle};
+use std::sync::mpsc;
 
 #[derive(Clone)]
 pub struct Poster<T: Serialize>
@@ -31,7 +31,7 @@ where
         let url = std::env::var("KARTALYTICS_URL")
             .expect("KARTALYTICS_URL not set in the environment - it is required.");
 
-        let (sender, receiver) = mpsc::sync_channel::<T>(1000);
+        let (sender, receiver) = mpsc::sync_channel::<T>(5000);
 
         let mut p = Poster {
             url,
@@ -63,13 +63,13 @@ where
         let clone = self.clone();
 
         std::thread::spawn(move || {
-            let pool = rayon::ThreadPoolBuilder::new().num_threads(4).build().expect("Failed to create threadpool");
+            let pool = rayon::ThreadPoolBuilder::new().build().expect("Failed to create threadpool");
 
             for item in rx.iter() {
                 let mut pool_clone = clone.clone();
                 pool.install(move || {
                     match pool_clone.process(item) {
-                        Ok(_) => { /* do nothing */ }
+                        Ok(_res) => { }
                         Err(e) => {
                             eprintln!("Erroring sending request");
                             eprintln!("Error: {e:?}");
@@ -138,7 +138,9 @@ mod tests {
 
         // this is much longer than _required_, because everything should be
         // done in ~1ms, but this feels like it'll reduce flakes
-        std::thread::sleep(Duration::from_millis(200));
+        std::thread::sleep(Duration::from_millis(500));
+
+        mock_1.assert_hits(10000);
 
         println!("hits: {}", mock_1.hits());
     }
