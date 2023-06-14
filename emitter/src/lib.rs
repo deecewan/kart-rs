@@ -1,6 +1,8 @@
 mod poster;
 
 use chrono::{DateTime, Duration, Utc};
+use log::debug;
+use log_err::LogErrResult;
 use serde::Serialize;
 use std::sync::Mutex;
 
@@ -58,7 +60,7 @@ where
 
     pub fn emit(&self, event_type: &str, data: &T) {
         if self.skip_emit(data) {
-            println!("Skipping the emit");
+            debug!("Skipping the emit");
             return;
         }
 
@@ -88,12 +90,12 @@ where
         // if the screens are different _or_ we've exceeded the timestamp, we
         // need to try again
         if self.exceeded_timestamp() {
-            println!("can't skip because longer than 0.5s");
+            debug!("can't skip because longer than 0.5s");
             return false;
         }
 
         if self.data_is_different_from_last_sent(data) {
-            println!("can't skip because the screens are different");
+            debug!("can't skip because the screens are different");
             return false;
         }
 
@@ -101,7 +103,7 @@ where
     }
 
     fn data_is_different_from_last_sent(&self, data: &T) -> bool {
-        let inner = self.inner.lock().expect("failed to lock the mutex");
+        let inner = self.inner.lock().log_expect("failed to lock the mutex");
 
         match &inner.last_emitted_data {
             // if we have never emitted a screen, we want to emit this one
@@ -112,7 +114,7 @@ where
 
     // we _always_ send every 0.5s.
     fn exceeded_timestamp(&self) -> bool {
-        let inner = self.inner.lock().expect("failed to lock the mutex");
+        let inner = self.inner.lock().log_expect("failed to lock the mutex");
 
         let now = Utc::now();
         let diff = now.signed_duration_since(inner.last_emitted_at);
@@ -126,7 +128,7 @@ where
             last_emitted_data: Some(data),
         };
 
-        let mut inner = self.inner.lock().expect("failed to lock the mutex");
+        let mut inner = self.inner.lock().log_expect("failed to lock the mutex");
         *inner = new_inner;
     }
 }

@@ -302,7 +302,7 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/wild_woods.jpg"),
                 },
                 IntroReference {
-                    name: "Yoshi's Island",
+                    name: "Yoshi’s Island",
                     reference: load_reference_hash!("intro/tracks/yoshis_island.jpg"),
                 },
             ],

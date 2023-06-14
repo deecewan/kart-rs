@@ -2,10 +2,17 @@ use analyzer::{analyze, Screen};
 use clap::Parser;
 use stream;
 
+use log::{error, info};
+use log_err::LogErrResult;
+use simplelog;
+use std::fs::File;
+
 mod cli;
 
 fn main() {
     let args = cli::Cli::parse();
+    init_logger(&args);
+    info!("hello");
 
     let frame_saver = FrameSaver::new(args.store_frames);
 
@@ -36,7 +43,7 @@ fn main() {
             }
         };
 
-        println!("{output} ({fps} fps)");
+        info!("{output} ({fps} fps)");
     });
 }
 
@@ -49,7 +56,7 @@ impl FrameSaver {
         let name = if save {
             let name = format!("{}", chrono::Utc::now().to_rfc3339());
             std::fs::create_dir_all(format!("frames/{}", name))
-                .expect("unable to create frame saving directory");
+                .log_expect("unable to create frame saving directory");
 
             Some(name)
         } else {
@@ -64,7 +71,40 @@ impl FrameSaver {
 
         let output_path = format!("frames/{}/frame_{:?}.jpg", name, count);
         if let Err(e) = frame.save(&output_path) {
-            eprintln!("Failed to save frame: {:?}", e);
+            error!("Failed to save frame: {:?}", e);
         }
     }
+}
+
+fn init_logger(args: &cli::Cli) {
+    let mut loggers: Vec<Box<dyn simplelog::SharedLogger>> = vec![];
+
+    let level = match &args.log {
+        cli::LogLevel::Debug => simplelog::LevelFilter::Debug,
+        cli::LogLevel::Info => simplelog::LevelFilter::Info,
+        cli::LogLevel::Error => simplelog::LevelFilter::Error,
+    };
+
+    loggers.push(simplelog::TermLogger::new(
+        level,
+        simplelog::Config::default(),
+        simplelog::TerminalMode::Mixed,
+        simplelog::ColorChoice::Auto,
+    ));
+
+    if args.store_logs {
+        let file = File::options()
+            .append(true)
+            .truncate(false)
+            .open("kart.log")
+            .log_expect("couldn't open kart.log for logging");
+
+        loggers.push(simplelog::WriteLogger::new(
+            level,
+            simplelog::Config::default(),
+            file,
+        ));
+    }
+
+    simplelog::CombinedLogger::init(loggers).log_expect("Couldn't initialize the logging service");
 }

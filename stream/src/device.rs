@@ -3,15 +3,17 @@ use image::DynamicImage;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use uvc;
+use log::{error, info};
+use log_err::LogErrResult;
 
 pub fn from_device<F>(on_frame: F)
 where
     F: 'static + Send + Sync + Fn(&DynamicImage, usize),
 {
     ensure_root();
-    let ctx = uvc::Context::new().expect("Could not get context");
+    let ctx = uvc::Context::new().log_expect("Could not get context");
     let device = get_device(&ctx);
-    let handle = device.open().expect("couldn't open handle to device");
+    let handle = device.open().log_expect("couldn't open handle to device");
 
     let format = uvc::StreamFormat {
         width: 1920,
@@ -22,7 +24,7 @@ where
 
     let mut stream_handle = handle
         .get_stream_handle_with_format(format)
-        .expect("Could not open a stream with this format");
+        .log_expect("Could not open a stream with this format");
 
     let counter = Arc::new(AtomicUsize::new(0));
     // Get a stream, calling the closure as callback for every frame
@@ -42,19 +44,19 @@ where
                         on_frame(&frame, count.load(Ordering::SeqCst));
                     }
                     Err(e) => {
-                        eprintln!("Err! {:?}", e);
+                        error!("Err! {:?}", e);
                     }
                 };
             },
             counter.clone(),
         )
-        .expect("Could not start stream");
+        .log_expect("Could not start stream");
 
     loop {}
 }
 
 fn get_device<'a>(ctx: &'a uvc::Context) -> uvc::Device<'a> {
-    let devices: Vec<uvc::Device> = ctx.devices().expect("Couldn't load devices").collect();
+    let devices: Vec<uvc::Device> = ctx.devices().log_expect("Couldn't load devices").collect();
     let options: Vec<String> = devices
         .iter()
         .map(|d| {
@@ -72,7 +74,7 @@ fn get_device<'a>(ctx: &'a uvc::Context) -> uvc::Device<'a> {
 
     if options.is_empty() {
         let string = console::style("Couldn't find any capture devices.").red();
-        eprintln!("{string}");
+        error!("{string}");
         std::process::exit(1);
     }
 
@@ -92,13 +94,15 @@ fn get_device<'a>(ctx: &'a uvc::Context) -> uvc::Device<'a> {
                     Some(desc.product_id as i32),
                     None,
                 )
-                .expect("Could not find device")
+                .log_expect("Could not find device")
             }
             None => {
+                error!("Selected device not in device array.");
                 panic!("Selected device not in device array.");
             }
         },
         Err(e) => {
+            error!("Error with device selection: {:?}", e);
             panic!("Error with device selection: {:?}", e);
         }
     }
@@ -132,7 +136,7 @@ fn ensure_root() {
                 console::pad_str("", 80, console::Alignment::Center, None),
                 console::pad_str_with("", 80, console::Alignment::Center, None, '-'),
             );
-            println!("{}", console::style(string).red());
+            info!("{}", console::style(string).red());
             std::process::exit(1);
         }
     }

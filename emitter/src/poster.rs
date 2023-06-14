@@ -1,7 +1,9 @@
+use log::{error, info};
+use log_err::LogErrResult;
 use reqwest::Response;
 use serde::Serialize;
-use tokio::runtime::Runtime;
 use std::sync::mpsc;
+use tokio::runtime::Runtime;
 
 #[derive(Clone)]
 pub struct Poster<T: Serialize>
@@ -27,10 +29,10 @@ where
         let client = reqwest::Client::builder()
             .default_headers(default_headers)
             .build()
-            .expect("Couldn't create a request client");
+            .log_expect("Couldn't create a request client");
 
         let url = std::env::var("KARTALYTICS_URL")
-            .expect("KARTALYTICS_URL not set in the environment - it is required.");
+            .log_expect("KARTALYTICS_URL not set in the environment - it is required.");
 
         let (sender, receiver) = mpsc::sync_channel::<T>(200);
 
@@ -49,7 +51,7 @@ where
         match self.sender.send(data) {
             Ok(_) => { /* do nothing */ }
             Err(e) => {
-                eprintln!("Failed to queue: {e:?}");
+                error!("Failed to queue: {e:?}");
             }
         }
     }
@@ -58,16 +60,16 @@ where
         let clone = self.clone();
 
         std::thread::spawn(move || {
-            let Ok(rt) = Runtime::new() else { panic!("Couldn't create tokio runtime"); };
+            let rt = Runtime::new().log_expect("Couldn't create a tokio runtime");
 
             rt.block_on(async move {
                 for item in rx.iter() {
                     let mut pool_clone = clone.clone();
                     tokio::spawn(async move {
                         match pool_clone.process(item).await {
-                            Ok(_) => {},
+                            Ok(_) => {}
                             Err(e) => {
-                                eprintln!("error sending request: {e:?}");
+                                error!("error sending request: {e:?}");
                             }
                         }
                     });
@@ -86,7 +88,7 @@ where
 
         let delta = end - start;
 
-        println!("Send took {delta:?}");
+        info!("Send took {delta:?}");
 
         return res;
     }
@@ -103,11 +105,15 @@ mod tests {
     fn it_sends_requests() {
         let server = MockServer::start();
         let mock_1 = server.mock(|when, then| {
-            when.method(httpmock::Method::POST).path("/").body("\"Hello\"");
+            when.method(httpmock::Method::POST)
+                .path("/")
+                .body("\"Hello\"");
             then.status(201);
         });
         let mock_2 = server.mock(|when, then| {
-            when.method(httpmock::Method::POST).path("/").body("\"World\"");
+            when.method(httpmock::Method::POST)
+                .path("/")
+                .body("\"World\"");
             then.status(201);
         });
 

@@ -448,6 +448,8 @@ impl Status {
 pub struct Player {
     #[serde(skip_serializing)]
     index: u8,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     position: Option<u8>,
 
     #[serde(skip_serializing_if = "Status::is_racing")]
