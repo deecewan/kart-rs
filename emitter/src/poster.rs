@@ -65,9 +65,7 @@ where
                     let mut pool_clone = clone.clone();
                     tokio::spawn(async move {
                         match pool_clone.process(item).await {
-                            Ok(res) => {
-                                println!("res: {res:?}");
-                            },
+                            Ok(_) => {},
                             Err(e) => {
                                 eprintln!("error sending request: {e:?}");
                             }
@@ -80,11 +78,9 @@ where
 
     async fn process(&mut self, item: T) -> reqwest::Result<Response> {
         let json = serde_json::to_string_pretty(&item).unwrap();
-        println!("sending {}", &json);
         let start = chrono::Utc::now();
         let sent_json = json.clone();
         let res = self.client.post(&self.url).body(sent_json).send().await;
-        println!("sent {}", &json);
 
         let end = chrono::Utc::now();
 
