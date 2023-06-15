@@ -1,0 +1,15 @@
+{
+  "name": "race_screen",
+  "body": {
+    "player_one": {
+      "position": 6
+    },
+    "player_two": {
+      "position": 2
+    },
+    "player_three": {},
+    "player_four": {
+      "position": 1
+    }
+  }
+}

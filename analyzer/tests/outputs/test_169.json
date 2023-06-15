@@ -1,0 +1,17 @@
+{
+  "name": "race_screen",
+  "body": {
+    "player_one": {
+      "position": 8
+    },
+    "player_two": {
+      "position": 2,
+      "item": "red-shell"
+    },
+    "player_three": {},
+    "player_four": {
+      "position": 3,
+      "item": "mushroom"
+    }
+  }
+}

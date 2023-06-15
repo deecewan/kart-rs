@@ -1,0 +1,15 @@
+{
+  "name": "race_screen",
+  "body": {
+    "player_one": {},
+    "player_two": {
+      "position": 1,
+      "item": "coin"
+    },
+    "player_three": {},
+    "player_four": {
+      "position": 3,
+      "item": "mushroom"
+    }
+  }
+}

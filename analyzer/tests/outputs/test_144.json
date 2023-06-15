@@ -1,0 +1,21 @@
+{
+  "name": "race_result_screen",
+  "body": {
+    "player_one": {
+      "position": 7,
+      "points": 6
+    },
+    "player_two": {
+      "position": 1,
+      "points": 15
+    },
+    "player_three": {
+      "position": 4,
+      "points": 9
+    },
+    "player_four": {
+      "position": 2,
+      "points": 12
+    }
+  }
+}

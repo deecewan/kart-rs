@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test Review</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h1>Review Outputs</h1>
+    <table>
+      <thead>
+        <tr>
+          <th colspan="3">Image Name</th>
+        </tr>
+        <tr>
+          <th>Image</th>
+          <th>Result</th>
+          <th>OK?</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {/*content*/}
+      </tbody>
+    </table>
+
+    <style>
+      table {
+        width: 60%;
+        margin-left: 20%;
+      }
+
+      td:has(img),
+      td:has(pre) {
+        width: 50%;
+      }
+      img {
+        width: 100%;
+      }
+
+      tr:has(input:checked),
+      tr:has(+ tr input:checked) {
+        display: none;
+      }
+
+      td[colspan="3"] {
+        text-align: center;
+      }
+    </style>
+  </body>
+</html>

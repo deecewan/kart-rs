@@ -1,0 +1,22 @@
+{
+  "name": "match_result_screen",
+  "body": {
+    "player_one": {
+      "position": 3,
+      "score": 55
+    },
+    "player_two": {
+      "position": 2,
+      "score": 76
+    },
+    "player_three": {
+      "position": 6,
+      "score": 43
+    },
+    "player_four": {
+      "position": 1,
+      "score": 77
+    },
+    "speed": 200
+  }
+}
