@@ -82,7 +82,12 @@ where
         let json = serde_json::to_string_pretty(&item).unwrap();
         let start = chrono::Utc::now();
         let sent_json = json.clone();
+
+        info!("sending: {json}");
+
         let res = self.client.post(&self.url).body(sent_json).send().await;
+
+        info!("result: {res:?}");
 
         let end = chrono::Utc::now();
 

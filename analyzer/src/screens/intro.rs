@@ -6,6 +6,7 @@ use crate::screens::Screen;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 use serde::Serialize;
+use log::{info, error};
 
 pub struct VariantGroup<'a> {
     pub variant: image_hasher::ImageHash,
@@ -434,12 +435,18 @@ impl Reference for Intro {
                     .duration_since(std::time::UNIX_EPOCH)
                     .expect("time went backwards")
                     .as_millis();
+
                 let filename = format!("unknown-intros/{}.jpg", timestamp);
-                frame.save(filename).expect("Failed to save unknown course");
+                if let Err(e) = frame.save(filename) {
+                    error!("failed to save screenshot for unknown course - make sure the unknown-intros/ folder exists. error: {e:?}");
+                }
+
                 "Unknown Course"
             }
             Some(course) => course,
         };
+
+        info!("Matched to course: {course}.");
 
         Some(Screen::Intro(Intro { course }))
     }

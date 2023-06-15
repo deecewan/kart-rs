@@ -82,16 +82,12 @@ impl Reference for MatchResult {
                 let average_blue = totals[2] / COLOR_STRIP_HEIGHT;
 
                 let player = if average_red > COLOR_THRESHOLD && average_green > COLOR_THRESHOLD {
-                    println!("yellow: {}", i + 1);
                     0
                 } else if average_green > COLOR_THRESHOLD && average_blue > COLOR_THRESHOLD {
-                    println!("blue: {}", i + 1);
                     1
                 } else if average_green > COLOR_THRESHOLD {
-                    println!("green: {}", i + 1);
                     3
                 } else if average_red > COLOR_THRESHOLD {
-                    println!("red: {}", i + 1);
                     2
                 } else {
                     return None;
@@ -108,6 +104,12 @@ impl Reference for MatchResult {
                 })
             })
             .collect::<Vec<PlayerResult>>();
+        if players.len() > 4 || players.len() < 3 {
+            // what??? we only support 3 or 4 players
+            eprintln!("too many players. found {}.", players.len());
+            return None;
+        }
+
         players.sort_unstable_by(|a, b| a.index.cmp(&b.index));
         let result = MatchResult {
             players,
@@ -160,7 +162,7 @@ fn get_number(section: &image::DynamicImage, x_offset: u32) -> Option<u8> {
     ) {
         (false, false, true, false, false, true, false) => Some(1),
         (true, false, true, true, true, false, true) => Some(2),
-        (true, false, true, true, false, true, true) => Some(8),
+        (true, false, true, true, false, true, true) => Some(3),
         (false, true, true, true, false, true, false) => Some(4),
         (true, true, false, true, false, true, true) => Some(5),
         (true, true, false, true, true, true, true) => Some(6),

@@ -30,6 +30,7 @@ dependencies = [
  "image",
  "image_hasher",
  "lazy_static",
+ "log",
  "pretty_assertions",
  "rayon",
  "serde",
