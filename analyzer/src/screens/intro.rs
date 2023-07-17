@@ -131,6 +131,10 @@ lazy_static! {
                     name: "Snow Land (GBA)",
                     reference: load_reference_hash!("intro/tracks/snow_land_gba.jpg"),
                 },
+                IntroReference {
+                    name: "Sunset Wilds (GBA)",
+                    reference: load_reference_hash!("intro/tracks/sunset_wilds_gba.jpg"),
+                },
             ],
         },
         VariantGroup {
@@ -139,6 +143,10 @@ lazy_static! {
                 IntroReference {
                     name: "Baby Park (GameCube)",
                     reference: load_reference_hash!("intro/tracks/baby_park_gcn.jpg"),
+                },
+                IntroReference {
+                    name: "Daisy Cruiser (GameCube)",
+                    reference: load_reference_hash!("intro/tracks/daisy_cruiser_gcn.jpg"),
                 },
                 IntroReference {
                     name: "Dry Dry Desert (GameCube)",
@@ -271,6 +279,10 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/skyhigh_sundae.jpg"),
                 },
                 IntroReference {
+                    name: "Squeaky Clean Sprint",
+                    reference: load_reference_hash!("intro/tracks/squeaky_clean_sprint.jpg"),
+                },
+                IntroReference {
                     name: "Sunshine Airport",
                     reference: load_reference_hash!("intro/tracks/sunshine_airport.jpg"),
                 },
@@ -333,6 +345,10 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/amsterdam_drift_tour.jpg"),
                 },
                 IntroReference {
+                  name: "Athens Dash (Tour)",
+                  reference: load_reference_hash!("intro/tracks/athens_dash_tour.jpg"),
+                },
+                IntroReference {
                     name: "Bangkok Rush (Tour)",
                     reference: load_reference_hash!("intro/tracks/bangkok_rush_tour.jpg"),
                 },
@@ -343,6 +359,10 @@ lazy_static! {
                 IntroReference {
                     name: "London Loop (Tour)",
                     reference: load_reference_hash!("intro/tracks/london_loop_tour.jpg"),
+                },
+                IntroReference {
+                    name: "Los Angeles Laps (Tour)",
+                    reference: load_reference_hash!("intro/tracks/los_angeles_laps_tour.jpg"),
                 },
                 IntroReference {
                     name: "New York Minute (Tour)",
@@ -364,6 +384,10 @@ lazy_static! {
                     name: "Tokyo Blur (Tour)",
                     reference: load_reference_hash!("intro/tracks/tokyo_blur_tour.jpg"),
                 },
+                IntroReference {
+                    name: "Vancouver Velocity (Tour)",
+                    reference: load_reference_hash!("intro/tracks/vancouver_velocity_tour.jpg"),
+                },
             ],
         },
         VariantGroup {
@@ -382,12 +406,20 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/grumble_volcano_wii.jpg"),
                 },
                 IntroReference {
+                    name: "Koopa Cape (Wii)",
+                    reference: load_reference_hash!("intro/tracks/koopa_cape_wii.jpg"),
+                },
+                IntroReference {
                     name: "Maple Treeway (Wii)",
                     reference: load_reference_hash!("intro/tracks/maple_treeway_wii.jpg"),
                 },
                 IntroReference {
                     name: "Moo Moo Meadows (Wii)",
                     reference: load_reference_hash!("intro/tracks/moo_moo_meadows_wii.jpg"),
+                },
+                IntroReference {
+                    name: "Moonview Highway (Wii)",
+                    reference: load_reference_hash!("intro/tracks/moonview_highway_wii.jpg"),
                 },
                 IntroReference {
                     name: "Mushroom Gorge (Wii)",

@@ -81,7 +81,7 @@ fn get_output_location(path: &PathBuf, generate_str: &str) -> Option<PathBuf> {
             return None;
         }
     };
-    let file_name = format!("{stem}_{generate_str}.png");
+    let file_name = format!("{stem}_{generate_str}.jpg");
 
     return Some(parent.join(file_name));
 }
