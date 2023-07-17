@@ -11,6 +11,7 @@ members = ["analyzer", "emitter", "stream", "util"]
 [workspace.dependencies]
 analyzer = { path = "./analyzer" }
 chrono = { version = "0.4.23", features = ["serde"] }
+clap = { version = "4.0.32", features = ["derive"] }
 console = "0.15.4"
 dialoguer = { features = ["fuzzy-select"], git = "https://github.com/mitsuhiko/dialoguer", rev = "0c8b5e5a93bb6ea467a488032aa47cbefa22a97c" }
 emitter = { path = "./emitter" }
@@ -27,7 +28,7 @@ stream = { path = "./stream" }
 [dependencies]
 analyzer = { workspace = true }
 chrono = { workspace = true }
-clap = { version = "4.0.32", features = ["derive"] }
+clap = { workspace = true }
 emitter = { workspace = true }
 image = { workspace = true }
 log = { workspace = true }

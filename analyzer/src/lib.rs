@@ -5,8 +5,8 @@ mod screens;
 mod util;
 
 use image;
-use reference::Reference;
-use screens::*;
+pub use reference::Reference;
+pub use screens::*;
 
 pub use screens::Screen;
 

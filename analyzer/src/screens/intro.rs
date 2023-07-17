@@ -405,7 +405,7 @@ lazy_static! {
 #[derive(Debug, PartialEq, Serialize, Clone, Copy)]
 pub struct Intro {
     #[serde(rename = "course_name")]
-    course: &'static str,
+    pub course: &'static str,
 }
 
 impl Reference for Intro {

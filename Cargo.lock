@@ -27,6 +27,7 @@ dependencies = [
 name = "analyzer"
 version = "0.1.0"
 dependencies = [
+ "clap 4.1.14",
  "image",
  "image_hasher",
  "lazy_static",
