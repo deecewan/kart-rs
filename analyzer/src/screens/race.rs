@@ -636,7 +636,7 @@ fn get_item(frame: &image::DynamicImage, index: usize) -> Option<Item> {
 fn get_status(frame: &image::DynamicImage, index: usize) -> Status {
     let [x, y] = FINISH_CROP[index];
 
-    let image = frame.crop_imm(x, y, 38, 38);
+    let image = frame.crop_imm(x, y, 90, 38);
 
     let res = hasher::hash_image(image);
 
