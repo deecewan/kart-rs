@@ -34,7 +34,7 @@ where
         let url = std::env::var("KARTALYTICS_URL")
             .log_expect("KARTALYTICS_URL not set in the environment - it is required.");
 
-        let (sender, receiver) = mpsc::sync_channel::<T>(200);
+        let (sender, receiver) = mpsc::sync_channel::<T>(2000);
 
         let mut p = Poster {
             url,
