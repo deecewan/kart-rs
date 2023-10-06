@@ -16,3 +16,10 @@ generated (i.e. if there are new tracks released), you can use the following:
 cargo build --release --bin generate_intro_references
 ../target/release/generate_intro_references --help
 ```
+
+### debug
+
+```
+cargo build --release --bin debug
+../target/release/debug --help
+```
