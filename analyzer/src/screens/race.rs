@@ -640,7 +640,7 @@ fn get_status(frame: &image::DynamicImage, index: usize) -> Status {
 
     let res = hasher::hash_image(image);
 
-    if FINISH_REFERENCE.dist(&res) < 15 {
+    if FINISH_REFERENCE.dist(&res) < 10 {
         Status::Finished
     } else {
         Status::Racing
