@@ -447,7 +447,7 @@ impl Reference for Intro {
         let check_hash = hasher::hash_image(crop);
         let delta = REFERENCE_HASH.dist(&check_hash);
 
-        if delta > 5 {
+        if delta > 4 {
             return false;
         }
 
