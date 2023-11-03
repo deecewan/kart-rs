@@ -4,9 +4,9 @@ use crate::load_reference_hash;
 use crate::reference::Reference;
 use crate::screens::Screen;
 use lazy_static::lazy_static;
+use log::{error, info};
 use rayon::prelude::*;
 use serde::Serialize;
-use log::{info, error};
 
 pub struct VariantGroup<'a> {
     pub variant: image_hasher::ImageHash,
@@ -345,8 +345,8 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/amsterdam_drift_tour.jpg"),
                 },
                 IntroReference {
-                  name: "Athens Dash (Tour)",
-                  reference: load_reference_hash!("intro/tracks/athens_dash_tour.jpg"),
+                    name: "Athens Dash (Tour)",
+                    reference: load_reference_hash!("intro/tracks/athens_dash_tour.jpg"),
                 },
                 IntroReference {
                     name: "Bangkok Rush (Tour)",

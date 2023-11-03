@@ -10,7 +10,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let emitter = emitter::Emit::<analyzer::Screen>::new(emitter::Mode::Real);
+    let emitter = emitter::Emit::<analyzer::Screen>::new(emitter::Mode::Debug);
 
     args.files.iter().for_each(|path| {
         if path.is_dir() {

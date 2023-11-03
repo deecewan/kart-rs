@@ -1378,6 +1378,7 @@ dependencies = [
  "image",
  "log",
  "log_err",
+ "rayon",
  "serde",
  "serde_json",
  "simplelog",

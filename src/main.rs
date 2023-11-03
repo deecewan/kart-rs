@@ -12,7 +12,6 @@ mod cli;
 fn main() {
     let args = cli::Cli::parse();
     init_logger(&args);
-    info!("hello");
 
     let frame_saver = FrameSaver::new(args.store_frames);
 
@@ -35,7 +34,7 @@ fn main() {
         let delta = end - start;
         let fps = std::time::Duration::from_secs(1).as_micros() / delta.as_micros();
 
-        let output = match res {
+        let output = match &res {
             None => "Unknown".into(),
             Some(screen) => {
                 let json = serde_json::to_string(&screen);

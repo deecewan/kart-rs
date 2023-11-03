@@ -2,10 +2,10 @@ use std::io::Write;
 
 use analyzer::analyze;
 use image;
-use serde_json;
-use serde::Serialize;
-use rayon::prelude::*;
 use pretty_assertions;
+use rayon::prelude::*;
+use serde::Serialize;
+use serde_json;
 
 #[derive(Serialize)]
 struct Event<'a, T: Serialize> {
@@ -21,49 +21,59 @@ fn inputs_match_outputs() {
 
     eprintln!("testing {} files", paths.len());
 
-    let results: Vec<_> = paths.par_iter().filter(|path| {
-        let Ok(input_image) = image::open(&path) else {
+    let results: Vec<_> = paths
+        .par_iter()
+        .filter(|path| {
+            let Ok(input_image) = image::open(&path) else {
             panic!("couldn't open input_image at {path:?}");
         };
 
-        let result = analyze(&input_image);
+            let result = analyze(&input_image);
 
-        let actual = match result {
-            Some(screen) => {
+            let actual = match result {
+                Some(screen) => {
+                    let event = Event {
+                        name: screen.event_type(),
+                        body: screen,
+                    };
+                    serde_json::to_string_pretty(&event).unwrap()
+                }
+                None => {
+                    let event: Event<Option<String>> = Event {
+                        name: "null screen".into(),
+                        body: None,
+                    };
 
-                let event = Event {
-                    name: screen.event_type(),
-                    body: screen,
-                };
-                serde_json::to_string_pretty(&event).unwrap()
-            },
-            None => {
-                let event: Event<Option<String>> = Event {
-                    name: "null screen".into(),
-                    body: None,
-                };
+                    serde_json::to_string_pretty(&event).unwrap()
+                }
+            };
 
-                serde_json::to_string_pretty(&event).unwrap()
+            let expectation_path = path
+                .to_str()
+                .expect("not a valid path name")
+                .to_string()
+                .replace("/inputs/", "/outputs/")
+                .replace(".jpg", ".json");
+
+            // NOTE: uncomment the 3 lines below to update the expectations
+            // use std::io::Write;
+            // let mut expectation_file = std::fs::File::create(&expectation_path).expect("couldn't open expectation file");
+            // write!(expectation_file, "{actual}").unwrap();
+
+            let expectation =
+                std::fs::read_to_string(&expectation_path).expect("no expectation found");
+
+            if expectation != actual {
+                eprintln!(
+                    "output from {path:?} differs from expectation at {expectation_path}\n\n{}",
+                    pretty_assertions::StrComparison::new(&expectation, &actual)
+                );
+
+                return false;
             }
-        };
 
-        let expectation_path = path.to_str().expect("not a valid path name").to_string().replace("/inputs/", "/outputs/").replace(".jpg", ".json");
-
-        // NOTE: uncomment the 3 lines below to update the expectations
-        // use std::io::Write;
-        // let mut expectation_file = std::fs::File::create(&expectation_path).expect("couldn't open expectation file");
-        // write!(expectation_file, "{actual}").unwrap();
-
-        let expectation = std::fs::read_to_string(&expectation_path).expect("no expectation found");
-
-        if expectation != actual {
-            eprintln!("output from {path:?} differs from expectation at {expectation_path}\n\n{}", pretty_assertions::StrComparison::new(&expectation, &actual));
-
-            return false;
-        }
-
-        return true;
-    })
+            return true;
+        })
         .collect();
 
     // we filter out all invalid results so if these don't match, we've failed
@@ -96,5 +106,9 @@ fn create_review_file() {
 
     let review_page = template.replace("{/*content*/}", &contents);
 
-    write!(std::fs::File::create(review_path).expect("couldn't open review file for writing"), "{review_page}").unwrap();
+    write!(
+        std::fs::File::create(review_path).expect("couldn't open review file for writing"),
+        "{review_page}"
+    )
+    .unwrap();
 }

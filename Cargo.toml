@@ -33,6 +33,7 @@ emitter = { workspace = true }
 image = { workspace = true }
 log = { workspace = true }
 log_err = { workspace = true }
+rayon = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 simplelog = { version = "0.12.1", features = [] }

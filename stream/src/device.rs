@@ -1,10 +1,10 @@
 use dialoguer::{theme::ColorfulTheme, Select};
 use image::DynamicImage;
+use log::{error, info};
+use log_err::LogErrResult;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use uvc;
-use log::{error, info};
-use log_err::LogErrResult;
 
 pub fn from_device<F>(on_frame: F)
 where

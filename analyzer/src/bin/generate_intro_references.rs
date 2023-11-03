@@ -10,10 +10,10 @@ enum ToGenerate {
 
 impl ToGenerate {
     fn to_str(&self) -> &str {
-    match self {
-        ToGenerate::Variant => "variant",
-        ToGenerate::Track => "track",
-    }
+        match self {
+            ToGenerate::Variant => "variant",
+            ToGenerate::Track => "track",
+        }
     }
 }
 
@@ -71,7 +71,6 @@ fn process(path: &PathBuf, image: &image::DynamicImage, generate: &ToGenerate) {
     if let Err(e) = reference.save(output_location) {
         eprintln!("Failed to save new {} reference - {e}", generate.to_str());
     }
-
 }
 
 fn get_output_location(path: &PathBuf, generate_str: &str) -> Option<PathBuf> {
