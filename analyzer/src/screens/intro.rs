@@ -336,7 +336,7 @@ lazy_static! {
             variant: load_reference_hash!("intro/variants/snes.png"),
             tracks: vec![
                 IntroReference {
-                    name: "Bowser Castle 3",
+                    name: "Bowser Castle 3 (SNES)",
                     reference: load_reference_hash!("intro/tracks/bowser_castle_3.jpg"),
                 },
                 IntroReference {
