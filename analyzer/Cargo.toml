@@ -7,9 +7,6 @@ edition = "2021"
 [[bin]]
 name = "generate_intro_references"
 
-[[bin]]
-name = "analyze-frames"
-
 [dependencies]
 image = { workspace = true }
 image_hasher = "1.1.2"
