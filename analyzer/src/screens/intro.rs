@@ -62,6 +62,10 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/rock_rock_mountain_3ds.jpg"),
                 },
                 IntroReference {
+                    name: "Rosalina’s Ice World (3DS)",
+                    reference: load_reference_hash!("intro/tracks/rosalina_s_ice_world.jpg"),
+                },
+                IntroReference {
                     name: "Toad Circuit (3DS)",
                     reference: load_reference_hash!("intro/tracks/toad_circuit_3ds.jpg"),
                 },
@@ -147,6 +151,10 @@ lazy_static! {
                 IntroReference {
                     name: "Daisy Cruiser (GameCube)",
                     reference: load_reference_hash!("intro/tracks/daisy_cruiser_gcn.jpg"),
+                },
+                IntroReference {
+                    name: "DK Mountain (GameCube)",
+                    reference: load_reference_hash!("intro/tracks/dk_mountain.jpg"),
                 },
                 IntroReference {
                     name: "Dry Dry Desert (GameCube)",
@@ -267,6 +275,10 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/ninja_hideaway.jpg"),
                 },
                 IntroReference {
+                    name: "Piranha Plant Cove",
+                    reference: load_reference_hash!("intro/tracks/piranha_plant_cove.jpg"),
+                },
+                IntroReference {
                     name: "Rainbow Road",
                     reference: load_reference_hash!("intro/tracks/rainbow_road.jpg"),
                 },
@@ -324,6 +336,10 @@ lazy_static! {
             variant: load_reference_hash!("intro/variants/snes.png"),
             tracks: vec![
                 IntroReference {
+                    name: "Bowser Castle 3",
+                    reference: load_reference_hash!("intro/tracks/bowser_castle_3.jpg"),
+                },
+                IntroReference {
                     name: "Donut Plains 3 (SNES)",
                     reference: load_reference_hash!("intro/tracks/donut_plains_3_snes.jpg"),
                 },
@@ -365,12 +381,20 @@ lazy_static! {
                     reference: load_reference_hash!("intro/tracks/los_angeles_laps_tour.jpg"),
                 },
                 IntroReference {
+                    name: "Madrid Drive (Tour)",
+                    reference: load_reference_hash!("intro/tracks/madrid_drive.jpg"),
+                },
+                IntroReference {
                     name: "New York Minute (Tour)",
                     reference: load_reference_hash!("intro/tracks/new_york_minute_tour.jpg"),
                 },
                 IntroReference {
                     name: "Paris Promenade (Tour)",
                     reference: load_reference_hash!("intro/tracks/paris_promenade_tour.jpg"),
+                },
+                IntroReference {
+                    name: "Rome Avanti (Tour)",
+                    reference: load_reference_hash!("intro/tracks/rome_avanti.jpg"),
                 },
                 IntroReference {
                     name: "Singapore Speedway (Tour)",
@@ -396,6 +420,10 @@ lazy_static! {
                 IntroReference {
                     name: "Coconut Mall (Wii)",
                     reference: load_reference_hash!("intro/tracks/coconut_mall_wii.jpg"),
+                },
+                IntroReference {
+                    name: "Daisy Circuit (Wii)",
+                    reference: load_reference_hash!("intro/tracks/daisy_circuit.jpg"),
                 },
                 IntroReference {
                     name: "DK's Snowboard Cross (Wii)",
@@ -424,6 +452,10 @@ lazy_static! {
                 IntroReference {
                     name: "Mushroom Gorge (Wii)",
                     reference: load_reference_hash!("intro/tracks/mushroom_gorge_wii.jpg"),
+                },
+                IntroReference {
+                    name: "Rainbow Road (Wii)",
+                    reference: load_reference_hash!("intro/tracks/rainbow_road_wii.jpg"),
                 },
                 IntroReference {
                     name: "Wario’s Gold Mine (Wii)",
