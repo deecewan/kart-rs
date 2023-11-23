@@ -479,7 +479,7 @@ impl Reference for Intro {
         let check_hash = hasher::hash_image(crop);
         let delta = REFERENCE_HASH.dist(&check_hash);
 
-        if delta > 4 {
+        if delta > 3 {
             return false;
         }
 
