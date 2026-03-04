@@ -26,6 +26,14 @@ where
             reqwest::header::HeaderValue::from_static("application/json"),
         );
 
+        let api_key = std::env::var("KARTALYTICS_API_KEY")
+            .log_expect("KARTALYTICS_API_KEY not set in the environment - it is required.");
+        default_headers.insert(
+            "X-Api-Key",
+            reqwest::header::HeaderValue::from_str(&api_key)
+                .log_expect("KARTALYTICS_API_KEY contains invalid header characters"),
+        );
+
         let client = reqwest::Client::builder()
             .default_headers(default_headers)
             .build()
@@ -124,6 +132,7 @@ mod tests {
 
         let server_url = server.url("/");
         std::env::set_var("KARTALYTICS_URL", server_url);
+        std::env::set_var("KARTALYTICS_API_KEY", "test-key");
         let p = Poster::<String>::new();
 
         p.queue("Hello".into());
@@ -147,6 +156,7 @@ mod tests {
 
         let server_url = server.url("/");
         std::env::set_var("KARTALYTICS_URL", server_url);
+        std::env::set_var("KARTALYTICS_API_KEY", "test-key");
         let p = Poster::<i32>::new();
 
         for i in 0..100 {
